@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, UploadCloud, Play, Loader2, Download, FileAudio } from 'lucide-react';
+import { Globe, UploadCloud, Loader2, Download, FileAudio } from 'lucide-react';
 import axios from 'axios';
 
 const AudioTranslator: React.FC = () => {
