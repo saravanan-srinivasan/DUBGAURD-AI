@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger("dubguard.speech_eval")
 
 class SpeechEvaluationService:
-    def __init__(self, model_size="base"):
+    def __init__(self, model_size="small"):
         self.model_size = model_size
         self.model = None
 
