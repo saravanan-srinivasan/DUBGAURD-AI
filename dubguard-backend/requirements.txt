@@ -10,7 +10,6 @@ torch
 torchaudio
 transformers
 sentence-transformers
-faster-whisper
 speechbrain
 demucs
 
