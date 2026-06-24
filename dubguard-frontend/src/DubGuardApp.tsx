@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Upload, FileAudio, FileVideo, CheckCircle2, Wand2, AlertTriangle, ShieldCheck, Zap, BarChart2, LogOut } from 'lucide-react';
-import { auth } from './firebase';
-import { signOut } from 'firebase/auth';
+import { Upload, FileAudio, FileVideo, CheckCircle2, Wand2, AlertTriangle, ShieldCheck, Zap, BarChart2 } from 'lucide-react';
 import './App.css';
 
 // --- Radial Progress SVG ---
@@ -105,23 +103,6 @@ function DubGuardApp() {
   return (
     <>
       {loading && <LoadingOverlay />}
-
-      {/* ─── NAVBAR ─── */}
-      <nav className="navbar">
-        <div className="navbar-brand">
-          <ShieldCheck size={28} className="navbar-icon" />
-          <span>DubGuard <span className="brand-ai">AI</span></span>
-        </div>
-        <div className="navbar-links">
-          <span className="nav-badge"><Zap size={13} /> 7 Neural Models</span>
-          <button 
-            onClick={() => signOut(auth)}
-            style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '0.4rem 1rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.85rem' }}
-          >
-            <LogOut size={16} /> Logout
-          </button>
-        </div>
-      </nav>
 
       <div className="app-container">
 
