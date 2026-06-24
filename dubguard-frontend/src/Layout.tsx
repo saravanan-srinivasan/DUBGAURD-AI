@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { ShieldCheck, Zap, LogOut, Mic, Globe, FileText, Activity, Music } from 'lucide-react';
+import { ShieldCheck, Zap, LogOut, Mic, Globe, FileText, Activity, Music, Menu, X } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase';
 import './Layout.css';
 
 const Layout: React.FC = () => {
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
     { path: '/', label: 'Evaluate', icon: <ShieldCheck size={16} /> },
@@ -23,14 +24,18 @@ const Layout: React.FC = () => {
         <div className="navbar-brand">
           <ShieldCheck size={28} className="navbar-icon" />
           <span>DubGuard <span className="brand-ai">AI</span></span>
+          <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
         
-        <div className="navbar-center-links">
+        <div className={`navbar-center-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
           {navLinks.map((link) => (
             <Link 
               key={link.path} 
               to={link.path} 
               className={`nav-link-item ${location.pathname === link.path ? 'active' : ''}`}
+              onClick={() => setMobileMenuOpen(false)}
             >
               {link.icon}
               <span className="nav-link-text">{link.label}</span>

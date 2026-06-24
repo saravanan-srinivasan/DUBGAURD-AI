@@ -1,5 +1,25 @@
 /* Layout.css */
 
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.5px;
+  justify-content: space-between;
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
 .navbar-center-links {
   display: flex;
   align-items: center;
@@ -51,7 +71,34 @@
 }
 
 @media (max-width: 900px) {
+  .navbar {
+    flex-wrap: wrap;
+  }
+  
+  .navbar-brand {
+    width: 100%;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
   .navbar-center-links {
-    display: none; /* We'd need a hamburger menu here eventually */
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .navbar-center-links.mobile-open {
+    display: flex;
+  }
+
+  .navbar-links {
+    display: none;
   }
 }
