@@ -90,6 +90,16 @@ function App() {
     }
   };
 
+  const handleReset = () => {
+    setResults(null);
+    setOriginalAudio(null);
+    setDubbedAudio(null);
+    setDubbedVideo(null);
+    setOriginalTranscript('');
+    setTranslatedTranscript('');
+    setError(null);
+  };
+
   return (
     <>
       {loading && <LoadingOverlay />}
@@ -284,7 +294,7 @@ function App() {
               </div>
             )}
 
-            <button className="submit-btn shimmer-btn" style={{ marginTop: '2rem' }} onClick={() => setResults(null)}>
+            <button className="submit-btn shimmer-btn" style={{ marginTop: '2rem' }} onClick={handleReset}>
               ← Evaluate Another File
             </button>
           </div>
