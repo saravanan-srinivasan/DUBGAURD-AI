@@ -70,6 +70,10 @@
   color: var(--error);
 }
 
+.mobile-logout-btn {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .navbar {
     flex-wrap: wrap;
@@ -99,6 +103,12 @@
   }
 
   .navbar-links {
-    display: none;
+    display: none !important;
+  }
+  
+  .mobile-logout-btn {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
   }
 }

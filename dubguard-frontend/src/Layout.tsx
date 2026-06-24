@@ -41,13 +41,19 @@ const Layout: React.FC = () => {
               <span className="nav-link-text">{link.label}</span>
             </Link>
           ))}
+          <button 
+            onClick={() => signOut(auth)}
+            className="logout-btn mobile-logout-btn"
+          >
+            <LogOut size={16} /> Logout
+          </button>
         </div>
 
         <div className="navbar-links">
           <span className="nav-badge"><Zap size={13} /> 7 Neural Models</span>
           <button 
             onClick={() => signOut(auth)}
-            className="logout-btn"
+            className="logout-btn desktop-logout-btn"
           >
             <LogOut size={16} /> Logout
           </button>
