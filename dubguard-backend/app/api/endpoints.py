@@ -137,3 +137,36 @@ async def voice_studio(request: VoiceStudioRequest):
         return {"audio_base64": base64_audio}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/translator")
+async def audio_translator(
+    audio: UploadFile = File(...),
+    target_lang: str = Form("en")
+):
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
+            content = await audio.read()
+            temp_audio.write(content)
+            temp_audio_path = temp_audio.name
+
+        original_transcript = speech_eval_service.transcribe(temp_audio_path)
+        if not original_transcript:
+            raise HTTPException(status_code=500, detail="Transcription failed.")
+
+        translated_text = auto_correction_service.translate_with_llm(original_transcript, target_lang)
+
+        tts_path, _ = auto_correction_service.generate_tts(translated_text, target_lang=target_lang)
+        if not tts_path or not os.path.exists(tts_path):
+            raise HTTPException(status_code=500, detail="Failed to generate translated audio.")
+            
+        with open(tts_path, "rb") as f:
+            audio_bytes = f.read()
+            base64_audio = base64.b64encode(audio_bytes).decode('utf-8')
+            
+        return {
+            "original_transcript": original_transcript,
+            "translated_transcript": translated_text,
+            "audio_base64": base64_audio
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

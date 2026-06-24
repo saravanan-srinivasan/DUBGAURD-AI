@@ -22,6 +22,31 @@ class AutoCorrectionService:
             except Exception as e:
                 logger.error(f"Failed to initialize Groq: {e}")
 
+    def translate_with_llm(self, text: str, target_lang: str) -> str:
+        """Uses Groq LLaMA 3 to translate text into the target language."""
+        self._init_groq()
+        if not self.groq_client:
+            return text
+
+        prompt = f"""
+You are a professional translator. Translate the following text into {target_lang}.
+Provide ONLY the translated text without any quotes, explanations, or conversational filler.
+
+Original Text:
+{text}
+"""
+        try:
+            response = self.groq_client.chat.completions.create(
+                messages=[{"role": "user", "content": prompt}],
+                model="llama3-70b-8192",
+                temperature=0.3,
+                max_tokens=1024
+            )
+            return response.choices[0].message.content.strip().replace('"', '')
+        except Exception as e:
+            logger.error(f"Groq LLM translation failed: {e}")
+            return text
+
     def fix_transcript_with_llm(self, original_transcript: str, dubbed_transcript: str, issues: List[str]) -> str:
         """Uses Groq LLaMA 3 to rewrite and fix the translated transcript."""
         self._init_groq()
