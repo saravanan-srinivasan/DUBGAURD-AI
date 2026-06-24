@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Upload, FileAudio, FileVideo, CheckCircle2, Wand2, Loader2, AlertTriangle, ShieldCheck, Zap, BarChart2, ExternalLink } from 'lucide-react';
+import { Upload, FileAudio, FileVideo, CheckCircle2, Wand2, AlertTriangle, ShieldCheck, Zap, BarChart2 } from 'lucide-react';
 import './App.css';
 
 // --- Radial Progress SVG ---
