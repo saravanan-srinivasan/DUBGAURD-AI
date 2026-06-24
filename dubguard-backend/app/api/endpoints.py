@@ -10,6 +10,7 @@ from app.services.speaker_similarity import speaker_service
 from app.services.lip_sync_analysis import lip_sync_service
 from app.services.audio_quality_analysis import audio_quality_service
 from app.services.auto_correction import auto_correction_service
+from app.services.vocal_isolator import vocal_isolator_service
 
 router = APIRouter()
 
@@ -211,5 +212,25 @@ async def emotion_analyzer(
             os.remove(temp_audio_path)
 
         return analysis
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/isolator")
+async def vocal_isolator(
+    audio: UploadFile = File(...)
+):
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio:
+            content = await audio.read()
+            temp_audio.write(content)
+            temp_audio_path = temp_audio.name
+
+        result = vocal_isolator_service.isolate(temp_audio_path)
+        
+        # Clean up temp file
+        if os.path.exists(temp_audio_path):
+            os.remove(temp_audio_path)
+
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
