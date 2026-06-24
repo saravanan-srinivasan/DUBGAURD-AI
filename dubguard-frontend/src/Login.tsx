@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, LogIn, Mail, Lock, UserPlus, AlertTriangle } from 'lucide-react';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from './firebase';
+import { useAuth } from './AuthContext';
 import './Login.css';
 
 const Login: React.FC = () => {
@@ -13,6 +14,13 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [highlightSignUp, setHighlightSignUp] = useState(false);
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+
+  React.useEffect(() => {
+    if (currentUser) {
+      navigate('/');
+    }
+  }, [currentUser, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
