@@ -1,11 +1,13 @@
 /* src/App.css */
 .app-container {
-  max-width: 1200px;
+  width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 3rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  box-sizing: border-box;
 }
 
 .header {
@@ -31,7 +33,7 @@
 
 .upload-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
 }
 
@@ -313,6 +315,10 @@ li {
   }
   
   .app-container {
-    padding: 1rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .upload-section {
+    grid-template-columns: 1fr;
   }
 }
