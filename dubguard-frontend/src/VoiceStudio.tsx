@@ -18,7 +18,7 @@ const VoiceStudio: React.FC = () => {
     try {
       // Assuming backend is running on same host in prod or localhost:8000 in dev
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const response = await axios.post(`${apiUrl}/api/voice-studio`, {
+      const response = await axios.post(`${apiUrl}/api/v1/voice-studio`, {
         text,
         language
       });

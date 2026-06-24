@@ -22,7 +22,7 @@ const PodcastSummarizer: React.FC = () => {
       formData.append('audio', audioFile);
 
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const response = await axios.post(`${apiUrl}/api/summarizer`, formData, {
+      const response = await axios.post(`${apiUrl}/api/v1/summarizer`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
