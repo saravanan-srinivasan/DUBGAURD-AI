@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, LogIn, Mail, Lock, UserPlus, AlertTriangle } from 'lucide-react';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from './firebase';
 import './Login.css';
 
@@ -36,6 +36,19 @@ const Login: React.FC = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      navigate('/');
+    } catch (err: any) {
+      if (err.code !== 'auth/popup-closed-by-user') {
+        setError(err.message.replace('Firebase: ', ''));
+      }
     }
   };
 
@@ -82,6 +95,15 @@ const Login: React.FC = () => {
             {loading ? 'Processing...' : (isLogin ? <><LogIn size={20} /> Sign In</> : <><UserPlus size={20} /> Create Account</>)}
           </button>
         </form>
+
+        <div className="login-divider">
+          <span>OR</span>
+        </div>
+
+        <button type="button" className="google-btn" onClick={handleGoogleLogin}>
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="google-icon" />
+          Continue with Google
+        </button>
 
         <div className="login-footer">
           <p 
