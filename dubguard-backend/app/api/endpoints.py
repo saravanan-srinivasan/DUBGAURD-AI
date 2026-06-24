@@ -115,3 +115,25 @@ async def download_corrected_audio(path: str):
         raise HTTPException(status_code=404, detail="Corrected audio file not found.")
         
     return FileResponse(requested_path, media_type="audio/mpeg", filename="corrected_dub.mp3")
+
+from pydantic import BaseModel
+import base64
+
+class VoiceStudioRequest(BaseModel):
+    text: str
+    language: str = "en"
+
+@router.post("/voice-studio")
+async def voice_studio(request: VoiceStudioRequest):
+    try:
+        audio_path, _ = auto_correction_service.generate_tts(request.text, target_lang=request.language)
+        if not audio_path or not os.path.exists(audio_path):
+            raise HTTPException(status_code=500, detail="Failed to generate audio.")
+            
+        with open(audio_path, "rb") as audio_file:
+            audio_bytes = audio_file.read()
+            base64_audio = base64.b64encode(audio_bytes).decode('utf-8')
+            
+        return {"audio_base64": base64_audio}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
