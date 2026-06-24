@@ -170,3 +170,26 @@ async def audio_translator(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/summarizer")
+async def podcast_summarizer(
+    audio: UploadFile = File(...)
+):
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
+            content = await audio.read()
+            temp_audio.write(content)
+            temp_audio_path = temp_audio.name
+
+        original_transcript = speech_eval_service.transcribe(temp_audio_path)
+        if not original_transcript:
+            raise HTTPException(status_code=500, detail="Transcription failed.")
+
+        summary = auto_correction_service.summarize_podcast(original_transcript)
+
+        return {
+            "transcript": original_transcript,
+            "summary": summary
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

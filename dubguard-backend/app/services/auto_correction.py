@@ -47,6 +47,36 @@ Original Text:
             logger.error(f"Groq LLM translation failed: {e}")
             return text
 
+    def summarize_podcast(self, text: str) -> str:
+        """Uses Groq LLaMA 3 to summarize a podcast/meeting transcript."""
+        self._init_groq()
+        if not self.groq_client:
+            return "Summarization unavailable (Groq client not initialized)."
+
+        prompt = f"""
+You are an expert executive assistant. Summarize the following audio transcript.
+Provide a clear, structured summary including:
+1. A brief 2-sentence overview.
+2. Key bullet points of the main topics discussed.
+3. Any action items or conclusions (if applicable).
+
+Format your response in Markdown.
+
+Transcript:
+{text}
+"""
+        try:
+            response = self.groq_client.chat.completions.create(
+                messages=[{"role": "user", "content": prompt}],
+                model="llama3-70b-8192",
+                temperature=0.4,
+                max_tokens=2048
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            logger.error(f"Groq LLM summarization failed: {e}")
+            return "An error occurred during summarization."
+
     def fix_transcript_with_llm(self, original_transcript: str, dubbed_transcript: str, issues: List[str]) -> str:
         """Uses Groq LLaMA 3 to rewrite and fix the translated transcript."""
         self._init_groq()
