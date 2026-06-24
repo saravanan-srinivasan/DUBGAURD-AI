@@ -22,7 +22,12 @@ class SpeechEvaluationService:
         """Transcribe an audio file using faster-whisper."""
         self._load_model()
         logger.info(f"Transcribing {audio_path}")
-        segments, info = self.model.transcribe(audio_path, beam_size=5)
+        segments, info = self.model.transcribe(
+            audio_path, 
+            beam_size=5,
+            vad_filter=True,
+            condition_on_previous_text=False
+        )
         transcript = " ".join([segment.text.strip() for segment in segments])
         return transcript
 
