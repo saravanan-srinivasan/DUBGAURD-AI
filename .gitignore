@@ -1,0 +1,20 @@
+# Node
+node_modules/
+dist/
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+venv/
+env/
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp test files
+*.wav
+*.mp3
+*.mp4
