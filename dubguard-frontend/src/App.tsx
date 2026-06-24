@@ -69,7 +69,7 @@ function App() {
   const [results, setResults] = useState<EvaluationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`;
+  const API_BASE = import.meta.env.VITE_API_URL || 'https://shravan2020-dubguard-backend.hf.space';
 
   const handleSubmit = async () => {
     if (!originalAudio || !dubbedAudio) { setError('Please upload both original and dubbed audio files.'); return; }
