@@ -10,7 +10,7 @@ class SpeechEvaluationService:
     def transcribe(self, audio_path: str) -> str:
         """Transcribe an audio file using Groq Whisper API (whisper-large-v3) for extreme accuracy."""
         from groq import Groq
-        from app.config import settings
+        from app.core.config import settings
         logger.info(f"Transcribing {audio_path} using Groq Whisper API")
         try:
             client = Groq(api_key=settings.GROQ_API_KEY)
