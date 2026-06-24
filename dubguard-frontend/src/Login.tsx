@@ -50,6 +50,7 @@ const Login: React.FC = () => {
   const handleGoogleLogin = async () => {
     setError('');
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     try {
       await signInWithPopup(auth, provider);
       navigate('/');
