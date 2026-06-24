@@ -28,10 +28,17 @@ class AutoCorrectionService:
         if not self.groq_client:
             return dubbed_transcript
 
+        # Detect the target language of the dubbed transcript
+        try:
+            import langdetect
+            target_lang_code = langdetect.detect(dubbed_transcript)
+        except:
+            target_lang_code = "the same language as the Dubbed Transcript"
+
         issues_text = ', '.join(issues)
         prompt = f"""
 You are a professional audio dubbing supervisor. The following dubbed transcript has quality issues compared to the original transcript.
-Your job is to rewrite the dubbed transcript to fix the translation errors and match the original context perfectly in the SAME LANGUAGE as the dubbed transcript.
+Your job is to rewrite the dubbed transcript to fix the translation errors and match the original context perfectly in the SAME LANGUAGE as the dubbed transcript (Language Code: {target_lang_code}).
 
 Original Transcript (Source of truth):
 "{original_transcript}"
@@ -45,8 +52,8 @@ Issues detected:
 CRITICAL RULES:
 1. Provide ONLY the final corrected dubbed transcript. 
 2. Do NOT include any conversational filler, explanations, or notes.
-3. Do NOT include phrases like "Note: Translated to Tamil" or "Here is the fixed text".
-4. Output NOTHING but the raw translated string.
+3. Do NOT include phrases like "Note: Translated to [Language]" or "Here is the fixed text".
+4. Output NOTHING but the raw translated string in language {target_lang_code}.
 """
         try:
             logger.info("Calling Groq LLM for transcript auto-correction...")
