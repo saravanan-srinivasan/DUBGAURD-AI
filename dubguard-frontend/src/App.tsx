@@ -1,37 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Upload, FileAudio, FileVideo, CheckCircle2, Wand2, Loader2, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Upload, FileAudio, FileVideo, CheckCircle2, Wand2, Loader2, AlertTriangle, ShieldCheck, Zap, BarChart2, ExternalLink } from 'lucide-react';
 import './App.css';
 
-// SVG Radial Progress Component
-const RadialProgress = ({ score, status }: { score: number, status: string }) => {
-  const [offset, setOffset] = useState(377); // 2 * Math.PI * 60
-  
+// --- Radial Progress SVG ---
+const RadialProgress = ({ score, status }: { score: number; status: string }) => {
+  const [offset, setOffset] = useState(377);
   useEffect(() => {
-    // Animate the stroke when the component mounts
-    setTimeout(() => {
-      const progressOffset = 377 - (377 * score) / 100;
-      setOffset(progressOffset);
-    }, 100);
+    setTimeout(() => setOffset(377 - (377 * score) / 100), 100);
   }, [score]);
-
   return (
     <div className="radial-progress-container">
       <svg className="radial-progress-svg" viewBox="0 0 140 140">
         <circle className="radial-progress-bg" cx="70" cy="70" r="60" />
-        <circle 
-          className={`radial-progress-bar ${status === 'PASS' ? 'pass' : 'fail'}`}
-          cx="70" cy="70" r="60" 
-          strokeDasharray="377" 
-          strokeDashoffset={offset} 
-        />
+        <circle className={`radial-progress-bar ${status === 'PASS' ? 'pass' : 'fail'}`} cx="70" cy="70" r="60" strokeDasharray="377" strokeDashoffset={offset} />
       </svg>
-      <div className={`radial-progress-text ${status === 'PASS' ? 'pass' : 'fail'}`}>
-        {Math.round(score)}
-      </div>
+      <div className={`radial-progress-text ${status === 'PASS' ? 'pass' : 'fail'}`}>{Math.round(score)}</div>
     </div>
   );
 };
+
+// --- Mini Metric Bar ---
+const MetricBar = ({ value, max = 100, color }: { value: number; max?: number; color: string }) => {
+  const [width, setWidth] = useState(0);
+  useEffect(() => { setTimeout(() => setWidth((value / max) * 100), 150); }, [value, max]);
+  return (
+    <div className="metric-bar-track">
+      <div className="metric-bar-fill" style={{ width: `${width}%`, background: color }} />
+    </div>
+  );
+};
+
+// --- Loading Overlay ---
+const LoadingOverlay = () => (
+  <div className="loading-overlay">
+    <div className="loading-card">
+      <div className="loading-ring" />
+      <h3>Running QA Pipeline</h3>
+      <p>7 neural networks are analyzing your audio...</p>
+      <div className="loading-steps">
+        {['Transcribing Audio', 'Evaluating Translation', 'Checking Pronunciation', 'Analyzing Emotion', 'Verifying Speaker', 'Scoring Lip-Sync', 'Auto-Correction Engine'].map((s, i) => (
+          <div key={i} className="loading-step" style={{ animationDelay: `${i * 0.4}s` }}>
+            <Zap size={14} /> <span>{s}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
 interface EvaluationResponse {
   overall_score: number;
@@ -49,244 +65,238 @@ function App() {
   const [dubbedVideo, setDubbedVideo] = useState<File | null>(null);
   const [originalTranscript, setOriginalTranscript] = useState('');
   const [translatedTranscript, setTranslatedTranscript] = useState('');
-  
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<EvaluationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`;
+
   const handleSubmit = async () => {
-    if (!originalAudio || !dubbedAudio) {
-      setError('Please provide all required audio files.');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setResults(null);
-
+    if (!originalAudio || !dubbedAudio) { setError('Please upload both original and dubbed audio files.'); return; }
+    setLoading(true); setError(null); setResults(null);
     const formData = new FormData();
     formData.append('original_audio', originalAudio);
     formData.append('dubbed_audio', dubbedAudio);
     if (dubbedVideo) formData.append('dubbed_video', dubbedVideo);
     formData.append('original_transcript', originalTranscript);
     formData.append('translated_transcript', translatedTranscript);
-
     try {
-      // Dynamically detect if we are on localhost or a local network IP (for mobile testing)
-      const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`;
-      
-      const response = await axios.post(`${API_BASE}/api/v1/evaluate-dubbing`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await axios.post(`${API_BASE}/api/v1/evaluate-dubbing`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       setResults(response.data);
     } catch (err: any) {
-      console.error(err);
-      setError(err.response?.data?.detail || 'An error occurred during evaluation. Make sure backend is running.');
+      setError(err.response?.data?.detail || 'An error occurred. Make sure the backend is running.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="app-container">
-      <header className="header animate-fade-in">
-        <h1>DubGuard AI</h1>
-        <p>Intelligent Dubbing Quality Assurance & Auto-Correction Platform</p>
-      </header>
+    <>
+      {loading && <LoadingOverlay />}
 
-      {!results && (
-        <div className="upload-section animate-fade-in">
-          <div className="upload-card glass-panel">
-            <h3><FileAudio size={24} /> Original Assets</h3>
-            
-            <div className="file-input-wrapper">
-              <button className={`btn-upload ${originalAudio ? 'has-file' : ''}`}>
-                <Upload size={28} />
-                <span>{originalAudio ? originalAudio.name : 'Upload Original Audio (WAV/MP3)'}</span>
-              </button>
-              <input type="file" accept="audio/*" onChange={(e) => setOriginalAudio(e.target.files?.[0] || null)} />
-            </div>
-
-            <textarea 
-              className="text-input" 
-              placeholder="Optional: Paste original source transcript here (Leave blank for AI Auto-Transcription)"
-              value={originalTranscript}
-              onChange={(e) => setOriginalTranscript(e.target.value)}
-            />
-          </div>
-
-          <div className="upload-card glass-panel">
-            <h3><Wand2 size={24} /> Dubbed Assets</h3>
-            
-            <div className="file-input-wrapper">
-              <button className={`btn-upload ${dubbedAudio ? 'has-file' : ''}`}>
-                <Upload size={28} />
-                <span>{dubbedAudio ? dubbedAudio.name : 'Upload Dubbed Audio (WAV/MP3)'}</span>
-              </button>
-              <input type="file" accept="audio/*" onChange={(e) => setDubbedAudio(e.target.files?.[0] || null)} />
-            </div>
-
-            <div className="file-input-wrapper">
-              <button className={`btn-upload ${dubbedVideo ? 'has-file' : ''}`}>
-                <FileVideo size={28} />
-                <span>{dubbedVideo ? dubbedVideo.name : 'Upload Dubbed Video (Optional for Lip-Sync)'}</span>
-              </button>
-              <input type="file" accept="video/*" onChange={(e) => setDubbedVideo(e.target.files?.[0] || null)} />
-            </div>
-
-            <textarea 
-              className="text-input" 
-              placeholder="Optional: Paste translated target transcript here (Leave blank for AI Auto-Transcription)"
-              value={translatedTranscript}
-              onChange={(e) => setTranslatedTranscript(e.target.value)}
-            />
-          </div>
+      {/* ─── NAVBAR ─── */}
+      <nav className="navbar">
+        <div className="navbar-brand">
+          <ShieldCheck size={28} className="navbar-icon" />
+          <span>DubGuard <span className="brand-ai">AI</span></span>
         </div>
-      )}
-
-      {!results && (
-        <button 
-          className="submit-btn" 
-          onClick={handleSubmit} 
-          disabled={loading || !originalAudio || !dubbedAudio}
-        >
-          {loading ? <><Loader2 className="loader" size={24}/> Processing QA Pipeline...</> : <><ShieldCheck size={24}/> Run Quality Evaluation</>}
-        </button>
-      )}
-
-      {error && (
-        <div className="glass-panel" style={{ padding: '1rem', color: 'var(--error)', textAlign: 'center', borderColor: 'var(--error)' }}>
-          {error}
+        <div className="navbar-links">
+          <span className="nav-badge"><Zap size={13} /> 7 Neural Models</span>
         </div>
-      )}
+      </nav>
 
-      {results && (
-        <div className="results-container animate-fade-in">
-          <div className={`score-banner glass-panel ${results.status === 'PASS' ? 'pass' : 'fail'}`}>
-            <div className="score-info">
-              <h2>{results.status === 'PASS' ? 'Quality Check Passed' : 'Quality Issues Detected'}</h2>
-              <p>DubGuard AI has completed the analysis across 7 neural evaluation models.</p>
+      <div className="app-container">
+
+        {/* ─── HERO ─── */}
+        {!results && (
+          <header className="header animate-fade-in">
+            <div className="hero-badge"><BarChart2 size={14} /> AI Dubbing Quality Assurance</div>
+            <h1>DubGuard <span className="gradient-text">AI</span></h1>
+            <p>Detect translation errors, voice mismatches & lip-sync drift with 7 neural evaluation models. Powered by auto-correction.</p>
+          </header>
+        )}
+
+        {/* ─── UPLOAD CARDS ─── */}
+        {!results && (
+          <div className="upload-section animate-fade-in">
+            {/* Original */}
+            <div className="upload-card glass-panel">
+              <div className="card-header">
+                <FileAudio size={20} className="card-icon original" />
+                <h3>Original Assets</h3>
+              </div>
+              <div className="file-input-wrapper">
+                <button className={`btn-upload ${originalAudio ? 'has-file' : ''}`}>
+                  <Upload size={26} />
+                  <span>{originalAudio ? originalAudio.name : 'Upload Original Audio (WAV/MP3)'}</span>
+                  {!originalAudio && <small>Click or drag & drop</small>}
+                </button>
+                <input type="file" accept="audio/*" onChange={(e) => setOriginalAudio(e.target.files?.[0] || null)} />
+              </div>
+              <textarea className="text-input" placeholder="Optional: Paste source transcript (or leave blank for AI auto-transcription)" value={originalTranscript} onChange={(e) => setOriginalTranscript(e.target.value)} />
             </div>
-            <RadialProgress score={results.overall_score} status={results.status} />
+
+            {/* Dubbed */}
+            <div className="upload-card glass-panel">
+              <div className="card-header">
+                <Wand2 size={20} className="card-icon dubbed" />
+                <h3>Dubbed Assets</h3>
+              </div>
+              <div className="file-input-wrapper">
+                <button className={`btn-upload ${dubbedAudio ? 'has-file' : ''}`}>
+                  <Upload size={26} />
+                  <span>{dubbedAudio ? dubbedAudio.name : 'Upload Dubbed Audio (WAV/MP3)'}</span>
+                  {!dubbedAudio && <small>Click or drag & drop</small>}
+                </button>
+                <input type="file" accept="audio/*" onChange={(e) => setDubbedAudio(e.target.files?.[0] || null)} />
+              </div>
+              <div className="file-input-wrapper">
+                <button className={`btn-upload ${dubbedVideo ? 'has-file' : ''}`}>
+                  <FileVideo size={26} />
+                  <span>{dubbedVideo ? dubbedVideo.name : 'Upload Dubbed Video (Optional for Lip-Sync)'}</span>
+                  {!dubbedVideo && <small>Enables lip-sync analysis</small>}
+                </button>
+                <input type="file" accept="video/*" onChange={(e) => setDubbedVideo(e.target.files?.[0] || null)} />
+              </div>
+              <textarea className="text-input" placeholder="Optional: Paste translated transcript (or leave blank for AI auto-transcription)" value={translatedTranscript} onChange={(e) => setTranslatedTranscript(e.target.value)} />
+            </div>
           </div>
+        )}
 
-          <div className="audio-comparison glass-panel" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '2rem' }}>
-            <div style={{ textAlign: 'center' }}>
-              <h4 style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>Original Audio</h4>
-              {originalAudio && <audio controls src={URL.createObjectURL(originalAudio)} style={{ height: '40px', outline: 'none' }} />}
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <h4 style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>Dubbed Audio</h4>
-              {dubbedAudio && <audio controls src={URL.createObjectURL(dubbedAudio)} style={{ height: '40px', outline: 'none' }} />}
-            </div>
+        {/* ─── SUBMIT BUTTON ─── */}
+        {!results && (
+          <div className="submit-wrapper">
+            <button className="submit-btn shimmer-btn" onClick={handleSubmit} disabled={loading || !originalAudio || !dubbedAudio}>
+              <ShieldCheck size={22} /> Run Quality Evaluation
+            </button>
+            {(!originalAudio || !dubbedAudio) && <p className="submit-hint">Upload both audio files to begin</p>}
           </div>
+        )}
 
-          <div className="details-grid">
-            <div className="detail-card glass-panel">
-              <h4>Speech Accuracy (WER)</h4>
-              <div className="detail-value">
-                {(results.detailed_metrics.speech_evaluation.wer * 100).toFixed(1)}%
-              </div>
-              <div className="detail-sub">Word Error Rate vs Reference</div>
-            </div>
+        {/* ─── ERROR ─── */}
+        {error && (
+          <div className="glass-panel error-banner">
+            <AlertTriangle size={20} /> {error}
+          </div>
+        )}
 
-            <div className="detail-card glass-panel">
-              <h4>Translation Match</h4>
-              <div className="detail-value">
-                {results.detailed_metrics.translation_evaluation.semantic_similarity.toFixed(1)}
-              </div>
-              <div className="detail-sub">Semantic Similarity (1-100)</div>
-            </div>
+        {/* ─── RESULTS ─── */}
+        {results && (
+          <div className="results-container animate-fade-in">
 
-            <div className="detail-card glass-panel">
-              <h4>Speaker Preservation</h4>
-              <div className="detail-value" style={{color: results.detailed_metrics.speaker_similarity.is_same_speaker ? 'var(--success)' : 'var(--error)'}}>
-                {results.detailed_metrics.speaker_similarity.similarity_score.toFixed(1)}%
-              </div>
-              <div className="detail-sub">Voice Cloning Similarity Match</div>
-            </div>
-
-            <div className="detail-card glass-panel">
-              <h4>Emotion Preservation</h4>
-              <div className="detail-value">
-                {results.detailed_metrics.emotion_analysis.similarity_score.toFixed(1)}%
-              </div>
-              <div className="detail-sub">Emotion Distribution Match</div>
-            </div>
-
-            {results.detailed_metrics.lip_sync_analysis?.lip_sync_score !== undefined && (
-              <div className="detail-card glass-panel">
-                <h4>Lip-Sync Precision</h4>
-                <div className="detail-value" style={{color: results.detailed_metrics.lip_sync_analysis.lip_sync_score > 70 ? 'var(--success)' : 'var(--error)'}}>
-                  {results.detailed_metrics.lip_sync_analysis.lip_sync_score.toFixed(1)}%
+            {/* Score Banner */}
+            <div className={`score-banner glass-panel ${results.status === 'PASS' ? 'pass' : 'fail'}`}>
+              <div className="score-info">
+                <div className={`status-pill ${results.status === 'PASS' ? 'pass' : 'fail'}`}>
+                  {results.status === 'PASS' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+                  {results.status === 'PASS' ? 'Quality Approved' : 'Issues Detected'}
                 </div>
-                <div className="detail-sub">
-                  A/V Latency: {results.detailed_metrics.lip_sync_analysis.ms_offset_latency}ms
+                <h2>{results.status === 'PASS' ? 'Dubbing Passed QA Check' : 'Dubbing Needs Attention'}</h2>
+                <p>Analyzed across 7 neural evaluation models simultaneously.</p>
+              </div>
+              <RadialProgress score={results.overall_score} status={results.status} />
+            </div>
+
+            {/* Audio Comparison */}
+            <div className="audio-comparison glass-panel">
+              <h4 className="section-label">🎧 Live Audio Comparison</h4>
+              <div className="audio-players">
+                <div className="audio-player-item">
+                  <span>Original</span>
+                  {originalAudio && <audio controls src={URL.createObjectURL(originalAudio)} />}
                 </div>
+                <div className="audio-divider">vs</div>
+                <div className="audio-player-item">
+                  <span>Dubbed</span>
+                  {dubbedAudio && <audio controls src={URL.createObjectURL(dubbedAudio)} />}
+                </div>
+              </div>
+            </div>
+
+            {/* Metric Cards */}
+            <div className="details-grid">
+              {[
+                { label: 'Speech Accuracy (WER)', value: (results.detailed_metrics.speech_evaluation.wer * 100).toFixed(1), sub: 'Word Error Rate vs Reference', color: '#6366f1', raw: results.detailed_metrics.speech_evaluation.wer * 100 },
+                { label: 'Translation Match', value: results.detailed_metrics.translation_evaluation.semantic_similarity.toFixed(1), sub: 'Semantic Similarity Score', color: '#8b5cf6', raw: results.detailed_metrics.translation_evaluation.semantic_similarity },
+                { label: 'Speaker Preservation', value: `${results.detailed_metrics.speaker_similarity.similarity_score.toFixed(1)}%`, sub: 'Voice Cloning Similarity', color: results.detailed_metrics.speaker_similarity.is_same_speaker ? '#10b981' : '#ef4444', raw: results.detailed_metrics.speaker_similarity.similarity_score },
+                { label: 'Emotion Preservation', value: `${results.detailed_metrics.emotion_analysis.similarity_score.toFixed(1)}%`, sub: 'Emotion Distribution Match', color: '#f59e0b', raw: results.detailed_metrics.emotion_analysis.similarity_score },
+              ].map((m, i) => (
+                <div key={i} className="detail-card glass-panel">
+                  <h4>{m.label}</h4>
+                  <div className="detail-value" style={{ color: m.color }}>{m.value}</div>
+                  <MetricBar value={m.raw} color={m.color} />
+                  <div className="detail-sub">{m.sub}</div>
+                </div>
+              ))}
+              {results.detailed_metrics.lip_sync_analysis?.lip_sync_score !== undefined && (
+                <div className="detail-card glass-panel">
+                  <h4>Lip-Sync Precision</h4>
+                  <div className="detail-value" style={{ color: results.detailed_metrics.lip_sync_analysis.lip_sync_score > 70 ? '#10b981' : '#ef4444' }}>
+                    {results.detailed_metrics.lip_sync_analysis.lip_sync_score.toFixed(1)}%
+                  </div>
+                  <MetricBar value={results.detailed_metrics.lip_sync_analysis.lip_sync_score} color={results.detailed_metrics.lip_sync_analysis.lip_sync_score > 70 ? '#10b981' : '#ef4444'} />
+                  <div className="detail-sub">A/V Latency: {results.detailed_metrics.lip_sync_analysis.ms_offset_latency}ms</div>
+                </div>
+              )}
+            </div>
+
+            {/* Issues & Recs */}
+            <div className="issues-container">
+              <div className="issues-list glass-panel">
+                <h3><AlertTriangle size={20} /> Issues Detected</h3>
+                {results.issues_detected.length > 0 ? (
+                  <ul>{results.issues_detected.map((issue, i) => <li key={i}>{issue}</li>)}</ul>
+                ) : (
+                  <p className="empty-state"><CheckCircle2 size={16} /> No quality issues detected — production ready!</p>
+                )}
+              </div>
+              <div className="recs-list glass-panel">
+                <h3><CheckCircle2 size={20} /> Auto-Correction Engine</h3>
+                {results.auto_correct_recommendations.length > 0 ? (
+                  <ul>{results.auto_correct_recommendations.map((rec, i) => <li key={i}>{rec}</li>)}</ul>
+                ) : (
+                  <p className="empty-state">No corrections needed.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Corrected Output */}
+            {(results.corrected_transcript || results.corrected_audio_path) && (
+              <div className="corrected-output-section glass-panel">
+                <h3><Wand2 size={22} /> Active Auto-Correction Results</h3>
+                {results.corrected_transcript && (
+                  <div className="corrected-block">
+                    <strong>LLM Rewritten Transcript</strong>
+                    <p>{results.corrected_transcript}</p>
+                  </div>
+                )}
+                {results.corrected_audio_path && (
+                  <div className="corrected-block">
+                    <strong>Regenerated TTS Audio</strong>
+                    <div className="audio-download-row">
+                      <audio controls src={`${API_BASE}/api/v1/download-corrected?path=${encodeURIComponent(results.corrected_audio_path)}`} />
+                      <a href={`${API_BASE}/api/v1/download-corrected?path=${encodeURIComponent(results.corrected_audio_path)}`} download="corrected_dub.mp3" className="download-btn">
+                        ⬇ Download Fix
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
+
+            <button className="submit-btn shimmer-btn" style={{ marginTop: '2rem' }} onClick={() => setResults(null)}>
+              ← Evaluate Another File
+            </button>
           </div>
+        )}
+      </div>
 
-          <div className="issues-container">
-            <div className="issues-list glass-panel">
-              <h3><AlertTriangle size={24} /> Issues Detected</h3>
-              {results.issues_detected.length > 0 ? (
-                <ul>
-                  {results.issues_detected.map((issue, i) => <li key={i}>{issue}</li>)}
-                </ul>
-              ) : (
-                <p style={{ color: 'var(--text-secondary)' }}>No quality issues detected. The dubbing is production-ready!</p>
-              )}
-            </div>
-
-            <div className="recs-list glass-panel">
-              <h3><CheckCircle2 size={24} /> Auto-Correction Engine</h3>
-              {results.auto_correct_recommendations.length > 0 ? (
-                <ul>
-                  {results.auto_correct_recommendations.map((rec, i) => <li key={i}>{rec}</li>)}
-                </ul>
-              ) : (
-                <p style={{ color: 'var(--text-secondary)' }}>No corrections needed.</p>
-              )}
-            </div>
-          </div>
-
-          {(results.corrected_transcript || results.corrected_audio_path) && (
-            <div className="corrected-output-section glass-panel" style={{ marginTop: '1.5rem', padding: '2rem', borderLeft: '4px solid var(--accent)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: 0, color: 'var(--warning)', fontSize: '1.3rem' }}><Wand2 size={24} /> Active Auto-Correction Results</h3>
-              {results.corrected_transcript && (
-                <div>
-                  <strong style={{ color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.85rem' }}>LLM Rewritten Transcript</strong>
-                  <p style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
-                    {results.corrected_transcript}
-                  </p>
-                </div>
-              )}
-              {results.corrected_audio_path && (
-                <div>
-                  <strong>Regenerated TTS Audio:</strong>
-                  <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-                    <audio controls src={`${window.location.hostname === 'localhost' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`}/api/v1/download-corrected?path=${encodeURIComponent(results.corrected_audio_path)}`} style={{ height: '40px', outline: 'none' }} />
-                    <a 
-                      href={`${window.location.hostname === 'localhost' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`}/api/v1/download-corrected?path=${encodeURIComponent(results.corrected_audio_path)}`}
-                      download="corrected_dub.mp3"
-                      className="submit-btn"
-                      style={{ padding: '0 1.5rem', width: 'auto', height: '40px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 0 }}
-                    >
-                      Download Fix
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          <button className="submit-btn" style={{marginTop: '3rem'}} onClick={() => setResults(null)}>
-            Evaluate Another File
-          </button>
-        </div>
-      )}
-    </div>
+      {/* ─── FOOTER ─── */}
+      <footer className="footer">
+        <p>DubGuard AI — Built with React, FastAPI & 7 Neural Networks</p>
+        <p className="footer-sub">© 2026 Saravanan Srinivasan</p>
+      </footer>
+    </>
   );
 }
 
