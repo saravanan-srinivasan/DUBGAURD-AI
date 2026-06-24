@@ -65,4 +65,27 @@ class EmotionAnalysisService:
                 "error": str(e)
             }
 
+    def analyze_audio(self, audio_path: str) -> dict:
+        """Analyze emotions for a single audio file and return the primary emotion and all probabilities."""
+        try:
+            probs = self.extract_emotions(audio_path).squeeze(0).tolist()
+            
+            # Typical RAVDESS labels for this model
+            labels = ["Angry", "Calm", "Disgust", "Fearful", "Happy", "Neutral", "Sad", "Surprised"]
+            
+            if len(probs) == len(labels):
+                emotion_scores = {labels[i]: round(probs[i] * 100, 2) for i in range(len(labels))}
+            else:
+                emotion_scores = {f"Emotion_{i}": round(probs[i] * 100, 2) for i in range(len(probs))}
+                
+            primary_emotion = max(emotion_scores.items(), key=lambda x: x[1])[0]
+            
+            return {
+                "primary_emotion": primary_emotion,
+                "emotions": emotion_scores
+            }
+        except Exception as e:
+            logger.error(f"Emotion analysis failed: {e}")
+            return {"primary_emotion": "Unknown", "emotions": {}}
+
 emotion_service = EmotionAnalysisService()

@@ -193,3 +193,23 @@ async def podcast_summarizer(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/emotion")
+async def emotion_analyzer(
+    audio: UploadFile = File(...)
+):
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
+            content = await audio.read()
+            temp_audio.write(content)
+            temp_audio_path = temp_audio.name
+
+        analysis = emotion_service.analyze_audio(temp_audio_path)
+        
+        # Clean up temp file
+        if os.path.exists(temp_audio_path):
+            os.remove(temp_audio_path)
+
+        return analysis
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
