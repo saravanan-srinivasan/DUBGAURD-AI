@@ -292,14 +292,14 @@ async def youtube_seo(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+from typing import List
+
 class MultiSpeakerBlock(BaseModel):
     text: str
     language: str
 
 class MultiSpeakerRequest(BaseModel):
     blocks: List[MultiSpeakerBlock]
-
-from typing import List
 
 @router.post("/voice-studio-multi")
 async def voice_studio_multi(request: MultiSpeakerRequest):
