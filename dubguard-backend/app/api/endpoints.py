@@ -127,7 +127,7 @@ class VoiceStudioRequest(BaseModel):
 @router.post("/voice-studio")
 async def voice_studio(request: VoiceStudioRequest):
     try:
-        audio_path, _ = auto_correction_service.generate_tts(request.text, target_lang=request.language)
+        audio_path = await auto_correction_service.generate_corrected_audio(request.text)
         if not audio_path or not os.path.exists(audio_path):
             raise HTTPException(status_code=500, detail="Failed to generate audio.")
             
@@ -156,7 +156,7 @@ async def audio_translator(
 
         translated_text = auto_correction_service.translate_with_llm(original_transcript, target_lang)
 
-        tts_path, _ = auto_correction_service.generate_tts(translated_text, target_lang=target_lang)
+        tts_path = await auto_correction_service.generate_corrected_audio(translated_text)
         if not tts_path or not os.path.exists(tts_path):
             raise HTTPException(status_code=500, detail="Failed to generate translated audio.")
             
