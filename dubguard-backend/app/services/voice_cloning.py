@@ -4,6 +4,9 @@ import tempfile
 import logging
 from typing import Optional
 
+# Automatically agree to Coqui TTS terms of service so it doesn't block the API
+os.environ["COQUI_TOS_AGREED"] = "1"
+
 logger = logging.getLogger("dubguard.voice_cloning")
 
 class VoiceCloningService:
