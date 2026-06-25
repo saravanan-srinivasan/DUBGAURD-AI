@@ -386,3 +386,39 @@ async def voice_clone(
     except Exception as e:
         logger.error(f"Voice clone endpoint error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/logs")
+async def get_logs():
+    try:
+        import sys
+        # Check if HF spaces logs are accessible, or just return something
+        return {"status": "ok", "message": "Log reading not supported directly, but endpoint is alive."}
+    except Exception as e:
+        return {"error": str(e)}
+
+@router.get("/test-tts")
+async def test_tts():
+    import traceback
+    try:
+        import os
+        model_path = "/app/xtts_v2_model"
+        files = os.listdir(model_path) if os.path.exists(model_path) else []
+        
+        from app.services.voice_cloning import voice_cloning_service
+        voice_cloning_service._init_tts()
+        
+        return {
+            "status": "success", 
+            "message": "TTS initialized successfully",
+            "model_dir_exists": os.path.exists(model_path),
+            "model_files": files,
+            "tts_loaded": voice_cloning_service.tts is not None
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+            "model_dir_exists": os.path.exists("/app/xtts_v2_model"),
+            "model_files": os.listdir("/app/xtts_v2_model") if os.path.exists("/app/xtts_v2_model") else []
+        }
