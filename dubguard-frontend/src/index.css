@@ -717,6 +717,13 @@ li { line-height: 1.6; color: var(--text-secondary); }
   box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
 }
 
+/* Fix dropdown options native styling */
+.text-input option {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  padding: 0.5rem;
+}
+
 /* ─── FOOTER ─────────────────────────────────────────────── */
 .footer {
   text-align: center;
