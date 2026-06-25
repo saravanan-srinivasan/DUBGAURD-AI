@@ -121,6 +121,48 @@ CRITICAL RULES:
             logger.error(f"Groq API error: {e}")
             return dubbed_transcript
 
+    async def generate_tts(self, text: str, target_lang: str = 'en') -> tuple[str, str]:
+        """Generates TTS audio for the given text in the target language. Translates if necessary."""
+        output_filename = f"tts_{uuid.uuid4().hex[:8]}.mp3"
+        temp_dir = tempfile.gettempdir()
+        output_path = os.path.join(temp_dir, output_filename)
+        
+        logger.info(f"Generating TTS audio for text in {target_lang}")
+        
+        try:
+            # 1. Detect language
+            import langdetect
+            detected_lang = langdetect.detect(text)
+            
+            # 2. Translate if necessary
+            final_text = text
+            if detected_lang != target_lang and target_lang != 'en':
+                try:
+                    final_text = self.translate_with_llm(text, target_lang)
+                except Exception as e:
+                    logger.warning(f"Translation failed, using original text: {e}")
+            
+            # 3. Generate Audio
+            voice_map = {
+                'en': 'en-US-JennyNeural',
+                'es': 'es-ES-AlvaroNeural',
+                'fr': 'fr-FR-DeniseNeural',
+                'ta': 'ta-IN-PallaviNeural',
+                'te': 'te-IN-ShrutiNeural',
+                'hi': 'hi-IN-SwaraNeural',
+                'de': 'de-DE-KatjaNeural',
+                'it': 'it-IT-ElsaNeural',
+            }
+            voice = voice_map.get(target_lang, 'en-US-JennyNeural')
+            
+            communicate = edge_tts.Communicate(final_text, voice)
+            await communicate.save(output_path)
+            
+            return output_path, final_text
+        except Exception as e:
+            logger.error(f"TTS generation failed: {e}")
+            return None, None
+
     async def generate_corrected_audio(self, fixed_text: str, orig_audio_path: str = None) -> str:
         """Uses Edge-TTS to generate a corrected dub audio file, and mixes it with original background music."""
         output_filename = f"corrected_dub_{uuid.uuid4().hex[:8]}.mp3"
