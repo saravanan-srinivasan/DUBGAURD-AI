@@ -23,6 +23,18 @@
   font-weight: 700;
   color: white;
   letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+
+.brand-name {
+  white-space: nowrap;
+  color: white;
+  line-height: 1;
+}
+
+.brand-ai {
+  color: var(--accent);
+  white-space: nowrap;
 }
 
 .mobile-menu-btn {

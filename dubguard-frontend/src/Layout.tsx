@@ -25,7 +25,7 @@ const Layout: React.FC = () => {
       <nav className="navbar">
         <div className="navbar-brand">
           <ShieldCheck size={28} className="navbar-icon" />
-          <span>DubGuard <span className="brand-ai">AI</span></span>
+          <span className="brand-name">DubGuard<span className="brand-ai"> AI</span></span>
           <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
