@@ -37,7 +37,7 @@ const Landing: React.FC = () => {
       </nav>
 
       {/* Hero Section */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '6rem 1.5rem', textAlign: 'center', zIndex: 10 }}>
+      <main style={{ minHeight: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '6rem 1.5rem', textAlign: 'center', zIndex: 10 }}>
         <div className="hero-badge animate-fade-in" style={{ marginBottom: '1.5rem' }}>
           <Zap size={14} /> The Ultimate Audio AI Suite
         </div>
