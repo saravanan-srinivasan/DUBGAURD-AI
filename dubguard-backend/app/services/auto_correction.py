@@ -4,12 +4,47 @@ import logging
 import asyncio
 import tempfile
 from typing import Dict, Any, List
-from groq import Groq
 import edge_tts
 
 logger = logging.getLogger("dubguard.auto_correction")
 
 from app.core.config import settings
+
+# Language code → full language name for LLM prompts
+LANG_NAMES = {
+    'en': 'English',
+    'ta': 'Tamil',
+    'te': 'Telugu',
+    'hi': 'Hindi',
+    'es': 'Spanish',
+    'fr': 'French',
+    'de': 'German',
+    'it': 'Italian',
+    'ja': 'Japanese',
+    'zh': 'Chinese',
+    'ar': 'Arabic',
+    'pt': 'Portuguese',
+    'ru': 'Russian',
+    'ko': 'Korean',
+}
+
+# Language code → Edge-TTS voice
+VOICE_MAP = {
+    'en': 'en-US-JennyNeural',
+    'ta': 'ta-IN-PallaviNeural',
+    'te': 'te-IN-ShrutiNeural',
+    'hi': 'hi-IN-SwaraNeural',
+    'es': 'es-ES-AlvaroNeural',
+    'fr': 'fr-FR-DeniseNeural',
+    'de': 'de-DE-KatjaNeural',
+    'it': 'it-IT-ElsaNeural',
+    'ja': 'ja-JP-NanamiNeural',
+    'zh': 'zh-CN-XiaoxiaoNeural',
+    'ar': 'ar-SA-ZariyahNeural',
+    'pt': 'pt-BR-FranciscaNeural',
+    'ru': 'ru-RU-SvetlanaNeural',
+    'ko': 'ko-KR-SunHiNeural',
+}
 
 class AutoCorrectionService:
     def __init__(self):
@@ -18,7 +53,14 @@ class AutoCorrectionService:
     def _init_groq(self):
         if self.groq_client is None:
             try:
-                self.groq_client = Groq(api_key=settings.GROQ_API_KEY)
+                from groq import Groq
+                # Try settings first, then env directly
+                api_key = settings.GROQ_API_KEY or os.environ.get("GROQ_API_KEY", "")
+                if not api_key:
+                    logger.error("GROQ_API_KEY not found!")
+                    return
+                self.groq_client = Groq(api_key=api_key)
+                logger.info("Groq client initialized successfully.")
             except Exception as e:
                 logger.error(f"Failed to initialize Groq: {e}")
 
@@ -26,23 +68,25 @@ class AutoCorrectionService:
         """Uses Groq LLaMA 3 to translate text into the target language."""
         self._init_groq()
         if not self.groq_client:
+            logger.warning("No Groq client, returning original text.")
             return text
 
-        prompt = f"""
-You are a professional translator. Translate the following text into {target_lang}.
-Provide ONLY the translated text without any quotes, explanations, or conversational filler.
+        lang_name = LANG_NAMES.get(target_lang, target_lang)
+        prompt = f"""You are a professional translator. Translate the following text to {lang_name}.
+Return ONLY the translated text. No explanations, no quotes, no extra text.
 
-Original Text:
-{text}
-"""
+Text to translate: {text}"""
+
         try:
             response = self.groq_client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
                 model="llama3-70b-8192",
-                temperature=0.3,
+                temperature=0.2,
                 max_tokens=1024
             )
-            return response.choices[0].message.content.strip().replace('"', '')
+            translated = response.choices[0].message.content.strip().strip('"').strip("'")
+            logger.info(f"Translated to {lang_name}: {translated[:60]}...")
+            return translated
         except Exception as e:
             logger.error(f"Groq LLM translation failed: {e}")
             return text
@@ -130,31 +174,19 @@ CRITICAL RULES:
         logger.info(f"Generating TTS audio for text in {target_lang}")
         
         try:
-            # 1. Detect language
-            import langdetect
-            detected_lang = langdetect.detect(text)
-            
-            # 2. Translate if necessary
+            # 1. Always translate to the target language
+            # Don't try to detect - just translate regardless. The LLM handles same-language gracefully.
             final_text = text
-            if detected_lang != target_lang and target_lang != 'en':
-                try:
-                    final_text = self.translate_with_llm(text, target_lang)
-                except Exception as e:
-                    logger.warning(f"Translation failed, using original text: {e}")
+            if target_lang != 'en':
+                # Always translate to the target language
+                final_text = self.translate_with_llm(text, target_lang)
+                logger.info(f"Text translated for TTS: {final_text[:60]}...")
             
-            # 3. Generate Audio
-            voice_map = {
-                'en': 'en-US-JennyNeural',
-                'es': 'es-ES-AlvaroNeural',
-                'fr': 'fr-FR-DeniseNeural',
-                'ta': 'ta-IN-PallaviNeural',
-                'te': 'te-IN-ShrutiNeural',
-                'hi': 'hi-IN-SwaraNeural',
-                'de': 'de-DE-KatjaNeural',
-                'it': 'it-IT-ElsaNeural',
-            }
-            voice = voice_map.get(target_lang, 'en-US-JennyNeural')
+            # 2. Pick the correct voice for the target language
+            voice = VOICE_MAP.get(target_lang, 'en-US-JennyNeural')
+            logger.info(f"Using voice: {voice} for language: {target_lang}")
             
+            # 3. Generate Audio with Edge-TTS
             communicate = edge_tts.Communicate(final_text, voice)
             await communicate.save(output_path)
             
