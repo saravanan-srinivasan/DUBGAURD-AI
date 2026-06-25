@@ -136,7 +136,7 @@ const VoiceClone: React.FC = () => {
         </div>
 
         <button 
-          className="generate-btn"
+          className="btn-primary"
           onClick={handleClone}
           disabled={isCloning}
           style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem', opacity: isCloning ? 0.7 : 1, cursor: isCloning ? 'not-allowed' : 'pointer' }}
