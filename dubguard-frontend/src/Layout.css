@@ -4,17 +4,16 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 1rem;
+  padding: 0 1.25rem;
   height: 56px;
   background: rgba(5,8,22,0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid rgba(255,255,255,0.06);
-  gap: 0.5rem;
-  overflow: hidden;
+  gap: 1rem;
 }
 
 .navbar-brand {
@@ -52,10 +51,9 @@
 .navbar-center-links {
   display: flex;
   align-items: center;
-  gap: 0.1rem;
-  flex: 1;
+  gap: 0.2rem;
   justify-content: center;
-  overflow: hidden;
+  flex-wrap: nowrap;
 }
 
 .nav-link-item {
