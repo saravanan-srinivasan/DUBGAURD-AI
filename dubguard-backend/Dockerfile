@@ -17,9 +17,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Pre-download the XTTS model into the image using huggingface_hub so it doesn't timeout
+# Pre-download YourTTS (only ~100MB, CPU-friendly voice cloning model)
 ENV COQUI_TOS_AGREED=1
-RUN python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='coqui/XTTS-v2', local_dir='/app/xtts_v2_model')"
+RUN python -c "\
+import os; \
+os.environ['COQUI_TOS_AGREED'] = '1'; \
+from TTS.api import TTS; \
+TTS('tts_models/multilingual/multi-dataset/your_tts', gpu=False); \
+print('YourTTS downloaded successfully!')"
 
 ENV PYTHONPATH=/app
 

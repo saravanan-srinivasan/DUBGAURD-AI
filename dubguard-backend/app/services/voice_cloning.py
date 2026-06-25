@@ -17,20 +17,22 @@ class VoiceCloningService:
     def _init_tts(self):
         if self.tts is None and not self.is_loading:
             self.is_loading = True
-            logger.info("Initializing Coqui XTTSv2 Voice Cloning Model (From local directory)...")
+            logger.info("Initializing YourTTS Voice Cloning Model...")
             try:
                 from TTS.api import TTS
-                # Load XTTSv2 from the pre-downloaded local directory
-                self.tts = TTS(model_path="/app/xtts_v2_model", config_path="/app/xtts_v2_model/config.json")
-                logger.info("XTTSv2 loaded successfully.")
+                # YourTTS: ~100MB, supports zero-shot voice cloning, runs on CPU reliably
+                self.tts = TTS("tts_models/multilingual/multi-dataset/your_tts", gpu=False)
+                logger.info("YourTTS loaded successfully.")
             except Exception as e:
-                logger.error(f"Failed to load XTTSv2: {e}")
+                logger.error(f"Failed to load YourTTS: {e}")
+                self.tts = None
             finally:
                 self.is_loading = False
 
     def clone_voice(self, text: str, reference_audio_path: str, language: str = "en") -> Optional[str]:
         """
         Clones a voice from the reference audio and speaks the provided text.
+        Uses YourTTS for fast, lightweight voice cloning.
         """
         # Ensure the model is loaded
         if self.tts is None:
@@ -45,13 +47,13 @@ class VoiceCloningService:
         output_filename = f"cloned_{uuid.uuid4().hex[:8]}.wav"
         output_path = os.path.join(temp_dir, output_filename)
 
-        logger.info(f"Generating cloned voice... (Text length: {len(text)})")
+        logger.info(f"Generating cloned voice with YourTTS... (Text length: {len(text)})")
         try:
             self.tts.tts_to_file(
                 text=text,
                 file_path=output_path,
                 speaker_wav=reference_audio_path,
-                language=language
+                language="en"  # YourTTS supports en, fr, de, pt, pl
             )
             logger.info(f"Cloned audio saved to {output_path}")
             return output_path
