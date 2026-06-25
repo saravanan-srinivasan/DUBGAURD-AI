@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from './firebase';
 import { useAuth } from './AuthContext';
-import { Clock, FileText, Download, Music, Globe } from 'lucide-react';
+import { Clock, FileText, Download, Music, Globe, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface HistoryItem {
   id: string;
-  type: 'voice' | 'translation' | 'summary' | 'emotion' | 'isolation';
+  type: 'voice' | 'voice-multi' | 'translation' | 'summary' | 'emotion' | 'isolation' | string;
   timestamp: number;
   data: any;
 }
@@ -18,45 +18,42 @@ const History: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      if (!currentUser) return;
-      
-      try {
-        const q = query(
-          collection(db, 'generations'),
-          where('userId', '==', currentUser.uid),
-          orderBy('timestamp', 'desc'),
-          limit(20)
-        );
-        
-        const querySnapshot = await getDocs(q);
-        const fetchedItems: HistoryItem[] = [];
-        querySnapshot.forEach((doc) => {
-          fetchedItems.push({ id: doc.id, ...doc.data() } as HistoryItem);
-        });
-        
-        setItems(fetchedItems);
-      } catch (error) {
-        console.error("Error fetching history:", error);
-        toast.error("Failed to load history. Ensure Firestore is configured properly.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!currentUser) return;
+    
+    setLoading(true);
+    
+    const q = query(
+      collection(db, 'generations'),
+      where('userId', '==', currentUser.uid),
+      orderBy('timestamp', 'desc'),
+      limit(20)
+    );
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const fetchedItems: HistoryItem[] = [];
+      querySnapshot.forEach((doc) => {
+        fetchedItems.push({ id: doc.id, ...doc.data() } as HistoryItem);
+      });
+      setItems(fetchedItems);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching history:", error);
+      toast.error(`History Error: ${error.message}`);
+      setLoading(false);
+    });
 
-    fetchHistory();
+    return () => unsubscribe();
   }, [currentUser]);
 
   const getIcon = (type: string) => {
     switch(type) {
       case 'voice': return <Music size={20} color="#a855f7" />;
+      case 'voice-multi': return <Users size={20} color="#ec4899" />;
       case 'translation': return <Globe size={20} color="#6366f1" />;
       case 'summary': return <FileText size={20} color="#10b981" />;
       default: return <Clock size={20} color="#f59e0b" />;
     }
   };
-  
-
 
   return (
     <div className="app-container">
@@ -88,9 +85,15 @@ const History: React.FC = () => {
                     {new Date(item.timestamp).toLocaleString()} • {item.type}
                   </div>
                   
-                  {item.type === 'voice' && (
+                  {item.type === 'voice' && item.data?.text && (
                     <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       "{item.data.text}"
+                    </p>
+                  )}
+
+                  {item.type === 'voice-multi' && (
+                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+                      Multi-Speaker Podcast generated successfully.
                     </p>
                   )}
 
@@ -99,15 +102,21 @@ const History: React.FC = () => {
                       Podcast Summary generated successfully.
                     </p>
                   )}
+
+                  {item.type === 'translation' && (
+                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+                      Audio Translation generated successfully.
+                    </p>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                  {item.data.audioUrl && (
+                  {item.data?.audioUrl && (
                     <a href={item.data.audioUrl} download={`${item.type}.mp3`} className="download-btn" style={{ padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.1)', boxShadow: 'none' }}>
-                      <Download size={18} />
+                      <Download size={18} /> Audio
                     </a>
                   )}
-                  {item.data.summary && (
+                  {item.data?.summary && (
                     <button onClick={() => {
                         const blob = new Blob([item.data.summary], { type: 'text/markdown' });
                         const url = URL.createObjectURL(blob);
