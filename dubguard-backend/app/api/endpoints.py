@@ -126,14 +126,22 @@ class VoiceStudioRequest(BaseModel):
     pitch: str = "+0Hz"
     rate: str = "+0%"
 
+def format_edge_value(val: str, fallback: str) -> str:
+    if not val:
+        return fallback
+    val = val.strip()
+    if not val.startswith('+') and not val.startswith('-'):
+        val = '+' + val
+    return val
+
 @router.post("/voice-studio")
 async def voice_studio(request: VoiceStudioRequest):
     try:
         audio_path, _ = await auto_correction_service.generate_tts(
             request.text, 
             target_lang=request.language,
-            pitch=request.pitch,
-            rate=request.rate
+            pitch=format_edge_value(request.pitch, '+0Hz'),
+            rate=format_edge_value(request.rate, '+0%')
         )
         if not audio_path or not os.path.exists(audio_path):
             raise HTTPException(status_code=500, detail="Failed to generate audio.")
@@ -313,7 +321,7 @@ class MultiSpeakerRequest(BaseModel):
 @router.post("/voice-studio-multi")
 async def voice_studio_multi(request: MultiSpeakerRequest):
     try:
-        blocks_dict = [{"text": b.text, "language": b.language, "pitch": b.pitch, "rate": b.rate} for b in request.blocks]
+        blocks_dict = [{"text": b.text, "language": b.language, "pitch": format_edge_value(b.pitch, '+0Hz'), "rate": format_edge_value(b.rate, '+0%')} for b in request.blocks]
         audio_path = await auto_correction_service.generate_multi_speaker_tts(blocks_dict)
         
         if not audio_path or not os.path.exists(audio_path):
