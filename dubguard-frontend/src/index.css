@@ -633,6 +633,8 @@ li { line-height: 1.6; color: var(--text-secondary); }
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
+  line-height: 1;
   background: linear-gradient(135deg, var(--accent), #7c3aed);
   color: white;
   border-radius: 8px;
