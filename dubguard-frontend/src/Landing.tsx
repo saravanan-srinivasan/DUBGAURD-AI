@@ -23,7 +23,7 @@ const Landing: React.FC = () => {
     <div className="landing-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       
       {/* Navbar */}
-      <nav className="navbar" style={{ position: 'relative', zIndex: 10, padding: '0 3rem' }}>
+      <nav className="navbar" style={{ position: 'relative', zIndex: 10 }}>
         <div className="navbar-brand">
           <ShieldCheck size={28} className="navbar-icon" />
           <span>DubGuard <span className="brand-ai">AI</span></span>
@@ -37,25 +37,25 @@ const Landing: React.FC = () => {
       </nav>
 
       {/* Hero Section */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '6rem 2rem', textAlign: 'center', zIndex: 10 }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '6rem 1.5rem', textAlign: 'center', zIndex: 10 }}>
         <div className="hero-badge animate-fade-in" style={{ marginBottom: '1.5rem' }}>
           <Zap size={14} /> The Ultimate Audio AI Suite
         </div>
         
-        <h1 className="animate-fade-in" style={{ fontSize: 'clamp(3rem, 7vw, 5.5rem)', fontWeight: 900, lineHeight: 1.1, maxWidth: '1000px', marginBottom: '1.5rem', animationDelay: '0.1s', animationFillMode: 'both' }}>
+        <h1 className="animate-fade-in" style={{ fontSize: 'clamp(2.8rem, 7vw, 5.5rem)', fontWeight: 900, lineHeight: 1.1, maxWidth: '1000px', marginBottom: '1.5rem', animationDelay: '0.1s', animationFillMode: 'both' }}>
           Your Audio, <br/>
           <span className="gradient-text">Supercharged by AI.</span>
         </h1>
         
-        <p className="animate-fade-in" style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', marginBottom: '3rem', animationDelay: '0.2s', animationFillMode: 'both' }}>
+        <p className="animate-fade-in" style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', maxWidth: '600px', marginBottom: '3rem', animationDelay: '0.2s', animationFillMode: 'both' }}>
           Translate, summarize, isolate, and generate human-like voices in seconds. Join the next generation of audio creators.
         </p>
 
-        <div className="animate-fade-in" style={{ display: 'flex', gap: '1rem', animationDelay: '0.3s', animationFillMode: 'both' }}>
-          <Link to="/login" className="submit-btn shimmer-btn" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', borderRadius: '999px' }}>
+        <div className="animate-fade-in" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', animationDelay: '0.3s', animationFillMode: 'both' }}>
+          <Link to="/login" className="submit-btn shimmer-btn" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', borderRadius: '999px', whiteSpace: 'nowrap' }}>
             Start for Free <ArrowRight size={20} />
           </Link>
-          <a href="#features" className="submit-btn" style={{ background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'none', borderRadius: '999px' }}>
+          <a href="#features" className="submit-btn" style={{ background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'none', borderRadius: '999px', whiteSpace: 'nowrap' }}>
             <Play size={20} /> See Features
           </a>
         </div>
