@@ -13,7 +13,6 @@
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid rgba(255,255,255,0.06);
-  gap: 1rem;
 }
 
 .navbar-brand {
@@ -26,6 +25,7 @@
   letter-spacing: -0.5px;
   white-space: nowrap;
   flex-shrink: 0;
+  padding-right: 0.5rem;
 }
 
 .brand-name {
@@ -51,9 +51,10 @@
 .navbar-center-links {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0rem;
   justify-content: center;
   flex-wrap: nowrap;
+  width: 100%;
 }
 
 .nav-link-item {
@@ -88,6 +89,7 @@
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
+  padding-left: 0.5rem;
 }
 
 .logout-btn {
