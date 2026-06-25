@@ -82,7 +82,7 @@ Text to translate: {text}"""
                 messages=[{"role": "user", "content": prompt}],
                 model="llama-3.3-70b-versatile",
                 temperature=0.2,
-                max_tokens=1024
+                max_tokens=4096
             )
             translated = response.choices[0].message.content.strip().strip('"').strip("'")
             logger.info(f"Translated to {lang_name}: {translated[:60]}...")
@@ -114,7 +114,7 @@ Transcript:
                 messages=[{"role": "user", "content": prompt}],
                 model="llama-3.3-70b-versatile",
                 temperature=0.4,
-                max_tokens=2048
+                max_tokens=4096
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
@@ -143,7 +143,7 @@ Transcript:
                 messages=[{"role": "user", "content": prompt}],
                 model="llama-3.3-70b-versatile",
                 temperature=0.6,
-                max_tokens=1024,
+                max_tokens=4096,
                 response_format={"type": "json_object"}
             )
             import json
@@ -191,6 +191,7 @@ CRITICAL RULES:
             chat_completion = self.groq_client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
                 model="llama-3.3-70b-versatile",
+                max_tokens=4096
             )
             return chat_completion.choices[0].message.content.strip()
         except Exception as e:
