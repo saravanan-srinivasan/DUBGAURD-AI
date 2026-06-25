@@ -25,6 +25,28 @@ class SpeechEvaluationService:
             logger.error(f"Groq Whisper transcription failed: {e}")
             return ""
 
+    def transcribe_with_timestamps(self, audio_path: str) -> list:
+        """Transcribe audio and return timestamped segments for SRT generation."""
+        from groq import Groq
+        from app.core.config import settings
+        try:
+            client = Groq(api_key=settings.GROQ_API_KEY)
+            with open(audio_path, "rb") as file:
+                transcription = client.audio.transcriptions.create(
+                    file=(audio_path, file.read()),
+                    model="whisper-large-v3",
+                    response_format="verbose_json"
+                )
+            # Depending on Groq's python client version, segments might be dicts or objects
+            if hasattr(transcription, "segments"):
+                return transcription.segments
+            elif isinstance(transcription, dict) and "segments" in transcription:
+                return transcription["segments"]
+            return []
+        except Exception as e:
+            logger.error(f"Groq Whisper timestamp transcription failed: {e}")
+            return []
+
     def compute_wer(self, reference: str, hypothesis: str) -> float:
         """Compute Word Error Rate (WER)."""
         if not reference.strip() or not hypothesis.strip():

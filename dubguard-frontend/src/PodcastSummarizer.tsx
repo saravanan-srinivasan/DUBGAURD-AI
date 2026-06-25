@@ -14,12 +14,16 @@ const PodcastSummarizer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [summary, setSummary] = useState('');
+  const [youtubeSeo, setYoutubeSeo] = useState<any>(null);
+  const [seoLoading, setSeoLoading] = useState(false);
+  const [srtLoading, setSrtLoading] = useState(false);
 
   const handleGenerate = async () => {
     if (!audioFile) return;
     setLoading(true);
     setTranscript('');
     setSummary('');
+    setYoutubeSeo(null);
 
     try {
       const formData = new FormData();
@@ -67,6 +71,56 @@ const PodcastSummarizer: React.FC = () => {
     doc.text(splitText, 20, 30);
     doc.save("Podcast_Summary.pdf");
     toast.success("PDF Downloaded");
+  };
+
+  const exportSubtitles = async () => {
+    if (!audioFile) return;
+    setSrtLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioFile);
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await axios.post(`${apiUrl}/api/v1/subtitles`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (response.data?.srt_content) {
+        const blob = new Blob([response.data.srt_content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${audioFile.name.split('.')[0]}_subtitles.srt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success("Subtitles Downloaded");
+      }
+    } catch (err) {
+      toast.error("Failed to generate subtitles");
+    } finally {
+      setSrtLoading(false);
+    }
+  };
+
+  const generateSeo = async () => {
+    if (!transcript) return;
+    setSeoLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('transcript', transcript);
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await axios.post(`${apiUrl}/api/v1/youtube-seo`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (response.data) {
+        setYoutubeSeo(response.data);
+        toast.success("SEO Metadata Generated");
+      }
+    } catch (err) {
+      toast.error("Failed to generate SEO metadata");
+    } finally {
+      setSeoLoading(false);
+    }
   };
 
   return (
@@ -119,14 +173,34 @@ const PodcastSummarizer: React.FC = () => {
               </button>
 
               {summary && (
-                <button 
-                  onClick={exportToPDF} 
-                  className="submit-btn"
-                  style={{ background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'none' }}
-                >
-                  <Download size={20} />
-                  Export to PDF
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button 
+                    onClick={exportToPDF} 
+                    className="submit-btn"
+                    style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'none' }}
+                  >
+                    <Download size={18} />
+                    PDF
+                  </button>
+                  <button 
+                    onClick={exportSubtitles} 
+                    className="submit-btn"
+                    disabled={srtLoading}
+                    style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'none' }}
+                  >
+                    {srtLoading ? <Loader2 size={18} className="spinner" /> : <Download size={18} />}
+                    .SRT
+                  </button>
+                  <button 
+                    onClick={generateSeo} 
+                    className="submit-btn"
+                    disabled={seoLoading}
+                    style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'none' }}
+                  >
+                    {seoLoading ? <Loader2 size={18} className="spinner" /> : <Sparkles size={18} />}
+                    SEO
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -152,6 +226,32 @@ const PodcastSummarizer: React.FC = () => {
                   </h3>
                   <div style={{ maxHeight: '350px', overflowY: 'auto', paddingRight: '1rem', fontSize: '0.95rem', lineHeight: '1.6', color: 'rgba(255,255,255,0.8)' }}>
                     {transcript}
+                  </div>
+                </div>
+              )}
+
+              {youtubeSeo && (
+                <div className="corrected-output-section animate-fade-in" style={{ padding: '2rem', background: 'rgba(239,68,68,0.04)', borderRadius: '16px', border: '1px solid rgba(239,68,68,0.1)' }}>
+                  <h3 style={{ marginBottom: '1.25rem', color: '#fca5a5', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Sparkles size={20} color="#ef4444" /> YouTube SEO Toolkit
+                  </h3>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <h4 style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Title</h4>
+                    <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>{youtubeSeo.title}</p>
+                  </div>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <h4 style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Description</h4>
+                    <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{youtubeSeo.description}</p>
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Tags</h4>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      {youtubeSeo.tags && youtubeSeo.tags.map((tag: string, i: number) => (
+                        <span key={i} style={{ padding: '0.2rem 0.6rem', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', fontSize: '0.8rem', color: 'white' }}>
+                          #{tag.replace(/\s+/g, '')}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}

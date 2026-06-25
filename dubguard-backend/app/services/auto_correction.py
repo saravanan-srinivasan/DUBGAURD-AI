@@ -121,6 +121,38 @@ Transcript:
             logger.error(f"Groq LLM summarization failed: {e}")
             return "An error occurred during summarization."
 
+    def generate_youtube_metadata(self, transcript: str) -> dict:
+        """Uses Groq LLaMA 3 to generate YouTube Title, Description, and Tags."""
+        self._init_groq()
+        if not self.groq_client:
+            return {"title": "Error", "description": "LLM client not initialized", "tags": []}
+
+        prompt = f"""
+You are an expert YouTube SEO strategist. Based on the following transcript, generate:
+1. A catchy, high-CTR YouTube video title (under 70 characters).
+2. A compelling YouTube video description (2-3 paragraphs, including a brief summary).
+3. A list of 10-15 highly searchable SEO tags (comma-separated).
+
+Return the response STRICTLY as a JSON object with the keys "title", "description", and "tags" (which should be a list of strings). Do not include any markdown formatting like ```json.
+
+Transcript:
+{transcript[:3000]}
+"""
+        try:
+            response = self.groq_client.chat.completions.create(
+                messages=[{"role": "user", "content": prompt}],
+                model="llama-3.3-70b-versatile",
+                temperature=0.6,
+                max_tokens=1024,
+                response_format={"type": "json_object"}
+            )
+            import json
+            content = response.choices[0].message.content.strip()
+            return json.loads(content)
+        except Exception as e:
+            logger.error(f"Groq LLM YouTube metadata generation failed: {e}")
+            return {"title": "Generation Failed", "description": str(e), "tags": []}
+
     def fix_transcript_with_llm(self, original_transcript: str, dubbed_transcript: str, issues: List[str]) -> str:
         """Uses Groq LLaMA 3 to rewrite and fix the translated transcript."""
         self._init_groq()
@@ -194,6 +226,48 @@ CRITICAL RULES:
         except Exception as e:
             logger.error(f"TTS generation failed: {e}")
             return None, None
+
+    async def generate_multi_speaker_tts(self, blocks: list) -> str:
+        """Generates TTS audio for a list of {text, language} blocks and concatenates them."""
+        temp_dir = tempfile.gettempdir()
+        output_filename = f"podcast_multi_{uuid.uuid4().hex[:8]}.mp3"
+        final_output_path = os.path.join(temp_dir, output_filename)
+        
+        from pydub import AudioSegment
+        import asyncio
+        
+        logger.info(f"Generating Multi-Speaker TTS for {len(blocks)} blocks.")
+        
+        try:
+            combined_audio = AudioSegment.empty()
+            
+            for i, block in enumerate(blocks):
+                text = block.get('text', '')
+                target_lang = block.get('language', 'en')
+                if not text.strip():
+                    continue
+                    
+                # We do NOT translate here. Multi-speaker assumes the user typed what they want.
+                voice = VOICE_MAP.get(target_lang, 'en-US-JennyNeural')
+                
+                block_filename = os.path.join(temp_dir, f"block_{i}_{uuid.uuid4().hex[:4]}.mp3")
+                communicate = edge_tts.Communicate(text, voice)
+                await communicate.save(block_filename)
+                
+                # Append to combined audio (with 0.5s pause between speakers)
+                segment = AudioSegment.from_file(block_filename)
+                if i > 0:
+                    combined_audio += AudioSegment.silent(duration=500)
+                combined_audio += segment
+                
+                # Clean up individual block file
+                os.remove(block_filename)
+                
+            combined_audio.export(final_output_path, format="mp3")
+            return final_output_path
+        except Exception as e:
+            logger.error(f"Multi-speaker TTS generation failed: {e}")
+            return None
 
     async def generate_corrected_audio(self, fixed_text: str, orig_audio_path: str = None) -> str:
         """Uses Edge-TTS to generate a corrected dub audio file, and mixes it with original background music."""

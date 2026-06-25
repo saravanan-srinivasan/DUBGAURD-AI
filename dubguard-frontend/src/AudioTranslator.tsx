@@ -14,6 +14,7 @@ const AudioTranslator: React.FC = () => {
   const [originalText, setOriginalText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [srtLoading, setSrtLoading] = useState(false);
 
   const handleGenerate = async () => {
     if (!audioFile) return;
@@ -59,6 +60,35 @@ const AudioTranslator: React.FC = () => {
       toast.error(err.response?.data?.detail || 'Failed to translate audio.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const exportSubtitles = async () => {
+    if (!audioFile) return;
+    setSrtLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioFile);
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await axios.post(`${apiUrl}/api/v1/subtitles`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (response.data?.srt_content) {
+        const blob = new Blob([response.data.srt_content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${audioFile.name.split('.')[0]}_subtitles.srt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success("Subtitles Downloaded");
+      }
+    } catch (err) {
+      toast.error("Failed to generate subtitles");
+    } finally {
+      setSrtLoading(false);
     }
   };
 
@@ -126,6 +156,18 @@ const AudioTranslator: React.FC = () => {
                   </>
                 )}
               </button>
+
+              {(originalText || audioUrl) && (
+                <button 
+                  onClick={exportSubtitles} 
+                  className="submit-btn"
+                  disabled={srtLoading}
+                  style={{ background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'none' }}
+                >
+                  {srtLoading ? <Loader2 size={18} className="spinner" /> : <Download size={18} />}
+                  Export Subtitles (.SRT)
+                </button>
+              )}
             </div>
           </div>
 

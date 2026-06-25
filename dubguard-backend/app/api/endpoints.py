@@ -234,3 +234,89 @@ async def vocal_isolator(
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+def format_timestamp(seconds: float) -> str:
+    """Format seconds into SRT timestamp format (HH:MM:SS,mmm)"""
+    import math
+    hours = math.floor(seconds / 3600)
+    minutes = math.floor((seconds % 3600) / 60)
+    secs = math.floor(seconds % 60)
+    msec = math.floor((seconds - math.floor(seconds)) * 1000)
+    return f"{hours:02d}:{minutes:02d}:{secs:02d},{msec:03d}"
+
+@router.post("/subtitles")
+async def generate_subtitles(
+    audio: UploadFile = File(...)
+):
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
+            content = await audio.read()
+            temp_audio.write(content)
+            temp_audio_path = temp_audio.name
+
+        segments = speech_eval_service.transcribe_with_timestamps(temp_audio_path)
+        
+        if os.path.exists(temp_audio_path):
+            os.remove(temp_audio_path)
+            
+        if not segments:
+            raise HTTPException(status_code=500, detail="Failed to generate subtitle segments.")
+            
+        srt_lines = []
+        for i, segment in enumerate(segments):
+            start_time = format_timestamp(segment.get('start', 0))
+            end_time = format_timestamp(segment.get('end', 0))
+            text = segment.get('text', '').strip()
+            
+            srt_lines.append(str(i + 1))
+            srt_lines.append(f"{start_time} --> {end_time}")
+            srt_lines.append(text)
+            srt_lines.append("") # blank line between segments
+            
+        srt_content = "\n".join(srt_lines)
+        
+        return {"srt_content": srt_content}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/youtube-seo")
+async def youtube_seo(
+    transcript: str = Form(...)
+):
+    try:
+        if not transcript.strip():
+            raise HTTPException(status_code=400, detail="Transcript is empty")
+            
+        metadata = auto_correction_service.generate_youtube_metadata(transcript)
+        return metadata
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class MultiSpeakerBlock(BaseModel):
+    text: str
+    language: str
+
+class MultiSpeakerRequest(BaseModel):
+    blocks: List[MultiSpeakerBlock]
+
+from typing import List
+
+@router.post("/voice-studio-multi")
+async def voice_studio_multi(request: MultiSpeakerRequest):
+    try:
+        blocks_dict = [{"text": b.text, "language": b.language} for b in request.blocks]
+        audio_path = await auto_correction_service.generate_multi_speaker_tts(blocks_dict)
+        
+        if not audio_path or not os.path.exists(audio_path):
+            raise HTTPException(status_code=500, detail="Failed to generate multi-speaker audio.")
+            
+        with open(audio_path, "rb") as audio_file:
+            audio_bytes = audio_file.read()
+            base64_audio = base64.b64encode(audio_bytes).decode('utf-8')
+            
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
+            
+        return {"audio_base64": base64_audio}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
