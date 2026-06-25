@@ -17,11 +17,11 @@ class VoiceCloningService:
     def _init_tts(self):
         if self.tts is None and not self.is_loading:
             self.is_loading = True
-            logger.info("Initializing Coqui XTTSv2 Voice Cloning Model (This may take a moment to download on first run)...")
+            logger.info("Initializing Coqui XTTSv2 Voice Cloning Model (From local directory)...")
             try:
                 from TTS.api import TTS
-                # Download and initialize XTTSv2
-                self.tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2")
+                # Load XTTSv2 from the pre-downloaded local directory
+                self.tts = TTS(model_path="/app/xtts_v2_model", config_path="/app/xtts_v2_model/config.json")
                 logger.info("XTTSv2 loaded successfully.")
             except Exception as e:
                 logger.error(f"Failed to load XTTSv2: {e}")

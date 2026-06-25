@@ -17,9 +17,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Pre-download the TTS model into the image so it doesn't timeout on the first API request
+# Pre-download the XTTS model into the image using huggingface_hub so it doesn't timeout
 ENV COQUI_TOS_AGREED=1
-RUN python -c "from TTS.api import TTS; TTS('tts_models/multilingual/multi-dataset/xtts_v2')"
+RUN python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='coqui/XTTS-v2', local_dir='/app/xtts_v2_model')"
 
 ENV PYTHONPATH=/app
 
