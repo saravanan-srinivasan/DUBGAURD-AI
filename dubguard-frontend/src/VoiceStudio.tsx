@@ -174,7 +174,7 @@ const VoiceStudio: React.FC = () => {
         <p>Synthesize high-quality neural speech or generate full multi-speaker podcast conversations.</p>
       </header>
 
-      <div className="upload-card glass-panel" style={{ padding: '2.5rem', width: '100%' }}>
+      <div className="upload-card glass-panel">
         
         {/* Toggle Mode */}
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '12px' }}>
@@ -194,7 +194,7 @@ const VoiceStudio: React.FC = () => {
 
         {!isMultiSpeaker ? (
           /* Single Speaker UI - 2 column grid */
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '2rem', animation: 'fadeIn 0.3s ease-out', alignItems: 'start' }}>
+          <div className="responsive-grid-sidebar" style={{ animation: 'fadeIn 0.3s ease-out' }}>
             {/* Left: Text input */}
             <textarea 
               placeholder="Enter text to synthesize into speech..."

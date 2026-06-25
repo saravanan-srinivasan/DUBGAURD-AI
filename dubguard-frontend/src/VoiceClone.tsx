@@ -82,10 +82,10 @@ const VoiceClone: React.FC = () => {
         <p>Upload a 5-10 second clip of anyone's voice and generate new speech.</p>
       </header>
 
-      <div className="upload-card glass-panel" style={{ padding: '2.5rem', width: '100%' }}>
+      <div className="upload-card glass-panel">
         
         {/* 2-column grid: upload left, text+button right */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem', alignItems: 'start' }}>
+        <div className="responsive-grid-2">
           
           {/* Left: Upload */}
           <div>
