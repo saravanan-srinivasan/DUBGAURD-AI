@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mic, Play, Download, Loader2, Sparkles } from 'lucide-react';
+import { Mic, Download, Loader2, Sparkles } from 'lucide-react';
 import axios from 'axios';
 
 const VoiceStudio: React.FC = () => {
