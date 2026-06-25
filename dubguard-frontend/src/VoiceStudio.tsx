@@ -31,20 +31,16 @@ const VoiceStudio: React.FC = () => {
         toast.success("Voice generated successfully!");
 
         if (currentUser) {
-          try {
-            await addDoc(collection(db, 'generations'), {
-              userId: currentUser.uid,
-              type: 'voice',
-              timestamp: Date.now(),
-              data: {
-                text: text,
-                language: language,
-                audioUrl: audioSrc
-              }
-            });
-          } catch (e) {
-            console.error("Failed to save to history", e);
-          }
+          addDoc(collection(db, 'generations'), {
+            userId: currentUser.uid,
+            type: 'voice',
+            timestamp: Date.now(),
+            data: {
+              text: text,
+              language: language,
+              audioUrl: audioSrc
+            }
+          }).catch((e) => console.error("Failed to save to history", e));
         }
       }
     } catch (err: any) {

@@ -41,21 +41,17 @@ const AudioTranslator: React.FC = () => {
           toast.success("Translation complete!");
 
           if (currentUser) {
-            try {
-              await addDoc(collection(db, 'generations'), {
-                userId: currentUser.uid,
-                type: 'translation',
-                timestamp: Date.now(),
-                data: {
-                  language: language,
-                  originalText: response.data.original_text,
-                  translatedText: response.data.translated_text,
-                  audioUrl: audioSrc
-                }
-              });
-            } catch (e) {
-              console.error("Failed to save to history", e);
-            }
+            addDoc(collection(db, 'generations'), {
+              userId: currentUser.uid,
+              type: 'translation',
+              timestamp: Date.now(),
+              data: {
+                language: language,
+                originalText: response.data.original_text,
+                translatedText: response.data.translated_text,
+                audioUrl: audioSrc
+              }
+            }).catch((e) => console.error("Failed to save to history", e));
           }
         }
       }

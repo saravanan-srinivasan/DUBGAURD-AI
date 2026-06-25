@@ -36,18 +36,14 @@ const PodcastSummarizer: React.FC = () => {
         toast.success("Summary generated successfully!");
 
         if (currentUser) {
-          try {
-            await addDoc(collection(db, 'generations'), {
-              userId: currentUser.uid,
-              type: 'summary',
-              timestamp: Date.now(),
-              data: {
-                summary: response.data.summary,
-              }
-            });
-          } catch (e) {
-            console.error("Failed to save to history", e);
-          }
+          addDoc(collection(db, 'generations'), {
+            userId: currentUser.uid,
+            type: 'summary',
+            timestamp: Date.now(),
+            data: {
+              summary: response.data.summary,
+            }
+          }).catch((e) => console.error("Failed to save to history", e));
         }
       }
     } catch (err: any) {
