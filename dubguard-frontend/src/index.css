@@ -391,8 +391,8 @@ button {
 
 /* ─── ACTION / SUBMIT BUTTON ─────────────────────────────── */
 .submit-btn {
-  background: #ffffff;
-  color: #000000;
+  background: var(--accent);
+  color: #ffffff !important;
   padding: 0.8rem 2rem;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -403,15 +403,16 @@ button {
   gap: 0.6rem;
   cursor: pointer;
   border: 1px solid transparent;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   transition: all 0.2s ease;
   font-family: 'Inter', sans-serif;
 }
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: #f8fafc;
-  box-shadow: 0 6px 16px rgba(255,255,255,0.15);
+  background: var(--accent-hover);
+  color: #ffffff !important;
+  box-shadow: 0 6px 16px rgba(99,102,241,0.25);
 }
 
 .submit-btn:disabled {
