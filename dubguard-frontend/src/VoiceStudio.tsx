@@ -193,30 +193,32 @@ const VoiceStudio: React.FC = () => {
         </div>
 
         {!isMultiSpeaker ? (
-          /* Single Speaker UI */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.3s ease-out' }}>
+          /* Single Speaker UI - 2 column grid */
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '2rem', animation: 'fadeIn 0.3s ease-out', alignItems: 'start' }}>
+            {/* Left: Text input */}
             <textarea 
               placeholder="Enter text to synthesize into speech..."
               value={text}
               onChange={(e) => setText(e.target.value)}
               className="text-input"
-              style={{ minHeight: '180px', fontSize: '1rem', lineHeight: '1.6' }}
+              style={{ minHeight: '260px', fontSize: '1rem', lineHeight: '1.6', height: '100%', boxSizing: 'border-box' }}
             />
             
-            <ToneControls p={pitch} r={rate} onPChange={setPitch} onRChange={setRate} />
-            
-            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-              <div style={{ flex: 1 }}>
+            {/* Right: Controls */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <ToneControls p={pitch} r={rate} onPChange={setPitch} onRChange={setRate} />
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <LanguageSelect value={language} onChange={setLanguage} />
+                <button 
+                  onClick={handleGenerateSingle} 
+                  disabled={loading || !text.trim()}
+                  className="submit-btn shimmer-btn"
+                  style={{ width: '100%' }}
+                >
+                  {loading ? <><Loader2 className="spinner" size={20} /> Generating...</> : <><Sparkles size={20} /> Generate Voice</>}
+                </button>
               </div>
-              <button 
-                onClick={handleGenerateSingle} 
-                disabled={loading || !text.trim()}
-                className="submit-btn shimmer-btn"
-                style={{ width: 'auto', minWidth: '200px' }}
-              >
-                {loading ? <><Loader2 className="spinner" size={20} /> Generating...</> : <><Sparkles size={20} /> Generate Voice</>}
-              </button>
             </div>
           </div>
         ) : (

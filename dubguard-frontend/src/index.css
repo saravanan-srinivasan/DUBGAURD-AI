@@ -236,9 +236,9 @@ button {
 /* ─── APP CONTAINER ─────────────────────────────────────── */
 .app-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem 2.5rem 4rem;
+  padding: 2rem 3rem 4rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;

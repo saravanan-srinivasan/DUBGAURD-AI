@@ -82,77 +82,84 @@ const VoiceClone: React.FC = () => {
         <p>Upload a 5-10 second clip of anyone's voice and generate new speech.</p>
       </header>
 
-      <div className="upload-card glass-panel" style={{ padding: '2.5rem', width: '100%', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div className="upload-card glass-panel" style={{ padding: '2.5rem', width: '100%' }}>
         
-        <div>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'white', fontSize: '1.2rem' }}>
-            <UploadCloud size={20} style={{ color: 'var(--accent)' }} />
-            1. Upload Reference Audio
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>Provide a clean, noise-free audio file (.wav or .mp3) under 10MB.</p>
+        {/* 2-column grid: upload left, text+button right */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem', alignItems: 'start' }}>
           
-          <div 
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            style={{ border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '3rem 2rem', textAlign: 'center', cursor: 'pointer', transition: 'all 0.3s', background: 'rgba(255,255,255,0.02)' }}
-            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent)'}
-            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'}
-          >
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleFileChange} 
-              accept="audio/*" 
-              style={{ display: 'none' }} 
-            />
-            {file ? (
-              <div style={{ color: '#4ade80', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                <Play size={20} />
-                {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-              </div>
-            ) : (
-              <div style={{ color: 'var(--text-secondary)' }}>
-                <UploadCloud size={48} style={{ margin: '0 auto 1rem auto', opacity: 0.5 }} />
-                <p>Click or drag and drop to upload audio</p>
-              </div>
-            )}
+          {/* Left: Upload */}
+          <div>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'white', fontSize: '1.2rem' }}>
+              <UploadCloud size={20} style={{ color: 'var(--accent)' }} />
+              1. Upload Reference Audio
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>Provide a clean, noise-free audio file (.wav or .mp3) under 10MB.</p>
+            
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              style={{ border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '3rem 2rem', textAlign: 'center', cursor: 'pointer', transition: 'all 0.3s', background: 'rgba(255,255,255,0.02)', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent)'}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'}
+            >
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                accept="audio/*" 
+                style={{ display: 'none' }} 
+              />
+              {file ? (
+                <div style={{ color: '#4ade80', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                  <Play size={20} />
+                  {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                </div>
+              ) : (
+                <div style={{ color: 'var(--text-secondary)' }}>
+                  <UploadCloud size={48} style={{ margin: '0 auto 1rem auto', opacity: 0.5 }} />
+                  <p>Click or drag and drop to upload audio</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right: Text + Button */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'white', fontSize: '1.2rem' }}>
+                <Sparkles size={20} style={{ color: 'var(--accent)' }} />
+                2. Enter Text to Synthesize
+              </h3>
+              <textarea
+                className="text-input"
+                placeholder="Type what you want the cloned voice to say..."
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                style={{ width: '100%', resize: 'vertical', minHeight: '200px', boxSizing: 'border-box' }}
+              />
+            </div>
+
+            <button 
+              className="submit-btn shimmer-btn"
+              onClick={handleClone}
+              disabled={isCloning}
+              style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '0.5rem', opacity: isCloning ? 0.7 : 1, cursor: isCloning ? 'not-allowed' : 'pointer' }}
+            >
+              {isCloning ? (
+                <>
+                  <Loader2 size={20} className="spinner" />
+                  Cloning Voice...
+                </>
+              ) : (
+                <>
+                  <Volume2 size={20} />
+                  Generate Voice Clone
+                </>
+              )}
+            </button>
           </div>
         </div>
-
-        <div>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'white', fontSize: '1.2rem' }}>
-            <Sparkles size={20} style={{ color: 'var(--accent)' }} />
-            2. Enter Text to Synthesize
-          </h3>
-          <textarea
-            className="text-input"
-            rows={5}
-            placeholder="Type what you want the cloned voice to say..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            style={{ width: '100%', resize: 'vertical' }}
-          />
-        </div>
-
-        <button 
-          className="submit-btn shimmer-btn"
-          onClick={handleClone}
-          disabled={isCloning}
-          style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem', opacity: isCloning ? 0.7 : 1, cursor: isCloning ? 'not-allowed' : 'pointer' }}
-        >
-          {isCloning ? (
-            <>
-              <Loader2 size={20} className="spinner" />
-              Cloning Voice...
-            </>
-          ) : (
-            <>
-              <Volume2 size={20} />
-              Generate Voice Clone
-            </>
-          )}
-        </button>
 
         {audioUrl && (
           <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
