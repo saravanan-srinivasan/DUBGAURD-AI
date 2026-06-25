@@ -43,6 +43,10 @@ async def startup_event():
         pronunciation_service._load_model()
         emotion_service._load_model()
         speaker_service._load_model()
+        
+        from app.services.voice_cloning import voice_cloning_service
+        voice_cloning_service._init_tts()
+        
         logger.info("All AI models pre-loaded successfully!")
     except Exception as e:
         logger.error(f"Error pre-loading models: {e}")
