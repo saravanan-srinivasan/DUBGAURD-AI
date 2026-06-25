@@ -72,7 +72,7 @@ const VoiceStudio: React.FC = () => {
 
   const formatEdgeValue = (val: string, unit: string) => {
     const num = Number(val);
-    return `${num > 0 ? '+' : ''}${num}${unit}`;
+    return `${num >= 0 ? '+' : ''}${num}${unit}`;
   };
 
   const handleGenerateSingle = async () => {
@@ -174,7 +174,7 @@ const VoiceStudio: React.FC = () => {
         <p>Synthesize high-quality neural speech or generate full multi-speaker podcast conversations.</p>
       </header>
 
-      <div className="upload-card glass-panel" style={{ padding: '2.5rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+      <div className="upload-card glass-panel" style={{ padding: '2.5rem', width: '100%' }}>
         
         {/* Toggle Mode */}
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '12px' }}>
