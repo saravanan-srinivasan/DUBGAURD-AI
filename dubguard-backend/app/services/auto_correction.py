@@ -80,7 +80,7 @@ Text to translate: {text}"""
         try:
             response = self.groq_client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
-                model="llama3-70b-8192",
+                model="llama-3.3-70b-versatile",
                 temperature=0.2,
                 max_tokens=1024
             )
@@ -112,7 +112,7 @@ Transcript:
         try:
             response = self.groq_client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
-                model="llama3-70b-8192",
+                model="llama-3.3-70b-versatile",
                 temperature=0.4,
                 max_tokens=2048
             )
