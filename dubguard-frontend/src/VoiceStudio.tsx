@@ -14,6 +14,43 @@ interface SpeakerBlock {
   rate: string;
 }
 
+const LanguageSelect = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => (
+  <select 
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    className="text-input"
+    style={{ minHeight: 'auto', padding: '0.85rem 1rem', cursor: 'pointer', maxWidth: '200px' }}
+  >
+    <option value="en">English (US)</option>
+    <option value="es">Spanish (ES)</option>
+    <option value="fr">French (FR)</option>
+    <option value="de">German (DE)</option>
+    <option value="it">Italian (IT)</option>
+    <option value="ta">Tamil (IN)</option>
+    <option value="te">Telugu (IN)</option>
+    <option value="hi">Hindi (IN)</option>
+  </select>
+);
+
+const ToneControls = ({ p, r, onPChange, onRChange }: { p: string, r: string, onPChange: (val: string) => void, onRChange: (val: string) => void }) => (
+  <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem', background: 'rgba(255,255,255,0.02)', padding: '1rem 1.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', flexWrap: 'wrap' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '150px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Sliders size={14} /> Pitch (Tone)</span>
+        <span>{Number(p) > 0 ? '+' : ''}{p}Hz</span>
+      </div>
+      <input type="range" min="-50" max="50" value={p} onChange={(e) => onPChange(e.target.value)} style={{ width: '100%', accentColor: '#a855f7' }} />
+    </div>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '150px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Sliders size={14} /> Speed (Rate)</span>
+        <span>{Number(r) > 0 ? '+' : ''}{r}%</span>
+      </div>
+      <input type="range" min="-50" max="50" value={r} onChange={(e) => onRChange(e.target.value)} style={{ width: '100%', accentColor: '#ec4899' }} />
+    </div>
+  </div>
+);
+
 const VoiceStudio: React.FC = () => {
   const { currentUser } = useAuth();
   const [isMultiSpeaker, setIsMultiSpeaker] = useState(false);
@@ -127,42 +164,7 @@ const VoiceStudio: React.FC = () => {
     setBlocks(blocks.map(b => b.id === id ? { ...b, [field]: value } : b));
   };
 
-  const LanguageSelect = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => (
-    <select 
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="text-input"
-      style={{ minHeight: 'auto', padding: '0.85rem 1rem', cursor: 'pointer', maxWidth: '200px' }}
-    >
-      <option value="en">English (US)</option>
-      <option value="es">Spanish (ES)</option>
-      <option value="fr">French (FR)</option>
-      <option value="de">German (DE)</option>
-      <option value="it">Italian (IT)</option>
-      <option value="ta">Tamil (IN)</option>
-      <option value="te">Telugu (IN)</option>
-      <option value="hi">Hindi (IN)</option>
-    </select>
-  );
 
-  const ToneControls = ({ p, r, onPChange, onRChange }: { p: string, r: string, onPChange: (val: string) => void, onRChange: (val: string) => void }) => (
-    <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem', background: 'rgba(255,255,255,0.02)', padding: '1rem 1.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', flexWrap: 'wrap' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '150px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Sliders size={14} /> Pitch (Tone)</span>
-          <span>{Number(p) > 0 ? '+' : ''}{p}Hz</span>
-        </div>
-        <input type="range" min="-50" max="50" value={p} onChange={(e) => onPChange(e.target.value)} style={{ width: '100%', accentColor: '#a855f7' }} />
-      </div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '150px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Sliders size={14} /> Speed (Rate)</span>
-          <span>{Number(r) > 0 ? '+' : ''}{r}%</span>
-        </div>
-        <input type="range" min="-50" max="50" value={r} onChange={(e) => onRChange(e.target.value)} style={{ width: '100%', accentColor: '#ec4899' }} />
-      </div>
-    </div>
-  );
 
   return (
     <div className="app-container">
