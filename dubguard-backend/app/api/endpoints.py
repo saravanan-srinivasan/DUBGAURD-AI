@@ -337,3 +337,52 @@ async def voice_studio_multi(request: MultiSpeakerRequest):
         return {"audio_base64": base64_audio}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+from app.services.voice_cloning import voice_cloning_service
+
+@router.post("/voice-clone")
+async def voice_clone(
+    text: str = Form(...),
+    language: str = Form("en"),
+    file: UploadFile = File(...)
+):
+    try:
+        import tempfile
+        import shutil
+        import uuid
+        import asyncio
+        
+        temp_dir = tempfile.gettempdir()
+        ref_path = os.path.join(temp_dir, f"ref_{uuid.uuid4().hex[:8]}.wav")
+        
+        with open(ref_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        loop = asyncio.get_event_loop()
+        audio_path = await loop.run_in_executor(
+            None, 
+            voice_cloning_service.clone_voice, 
+            text, ref_path, language
+        )
+
+        try:
+            os.remove(ref_path)
+        except:
+            pass
+
+        if not audio_path or not os.path.exists(audio_path):
+            raise HTTPException(status_code=500, detail="Failed to generate cloned voice.")
+            
+        with open(audio_path, "rb") as audio_file:
+            audio_base64 = base64.b64encode(audio_file.read()).decode('utf-8')
+            
+        try:
+            os.remove(audio_path)
+        except:
+            pass
+            
+        return {"status": "success", "audio_base64": audio_base64}
+        
+    except Exception as e:
+        logger.error(f"Voice clone endpoint error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
