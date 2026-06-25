@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { ShieldCheck, Zap, LogOut, Mic, Globe, FileText, Activity, Music, Menu, X, Clock } from 'lucide-react';
+import { ShieldCheck, Zap, LogOut, Mic, Globe, FileText, Activity, Music, Menu, X, Clock, Volume2 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase';
 import './Layout.css';
@@ -13,6 +13,7 @@ const Layout: React.FC = () => {
     { path: '/evaluate', label: 'Evaluate', icon: <ShieldCheck size={16} /> },
     { path: '/history', label: 'History', icon: <Clock size={16} /> },
     { path: '/voice-studio', label: 'Voice Studio', icon: <Mic size={16} /> },
+    { path: '/voice-clone', label: 'Voice Clone', icon: <Volume2 size={16} /> },
     { path: '/translator', label: 'Translator', icon: <Globe size={16} /> },
     { path: '/summarizer', label: 'Summarizer', icon: <FileText size={16} /> },
     { path: '/emotion', label: 'Emotion', icon: <Activity size={16} /> },

@@ -12,6 +12,7 @@ import AudioTranslator from './AudioTranslator';
 import PodcastSummarizer from './PodcastSummarizer';
 import EmotionAnalyzer from './EmotionAnalyzer';
 import VocalIsolator from './VocalIsolator';
+import VoiceClone from './VoiceClone';
 import './index.css';
 
 // Protected Route Component
@@ -57,6 +58,7 @@ function App() {
             <Route path="summarizer" element={<PodcastSummarizer />} />
             <Route path="emotion" element={<EmotionAnalyzer />} />
             <Route path="isolator" element={<VocalIsolator />} />
+            <Route path="voice-clone" element={<VoiceClone />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
