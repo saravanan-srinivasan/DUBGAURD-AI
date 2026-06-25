@@ -30,7 +30,7 @@ const Landing: React.FC = () => {
         </div>
         <div className="navbar-links">
           <Link to="/login" className="nav-link" style={{ fontWeight: 600 }}>Login</Link>
-          <Link to="/login" className="submit-btn shimmer-btn" style={{ padding: '0.5rem 1.5rem', borderRadius: '999px', fontSize: '0.9rem' }}>
+          <Link to="/login" className="submit-btn shimmer-btn" style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', fontSize: '0.9rem' }}>
             Get Started
           </Link>
         </div>
@@ -42,7 +42,7 @@ const Landing: React.FC = () => {
           <Zap size={14} /> The Ultimate Audio AI Suite
         </div>
         
-        <h1 className="animate-fade-in" style={{ fontSize: 'clamp(2.8rem, 7vw, 5.5rem)', fontWeight: 900, lineHeight: 1.1, maxWidth: '1000px', marginBottom: '1.5rem', animationDelay: '0.1s', animationFillMode: 'both' }}>
+        <h1 className="animate-fade-in" style={{ fontSize: 'clamp(2.5rem, 6vw, 4.8rem)', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.1, maxWidth: '900px', marginBottom: '1.5rem', animationDelay: '0.1s', animationFillMode: 'both' }}>
           Your Audio, <br/>
           <span className="gradient-text">Supercharged by AI.</span>
         </h1>
@@ -52,11 +52,11 @@ const Landing: React.FC = () => {
         </p>
 
         <div className="animate-fade-in" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', animationDelay: '0.3s', animationFillMode: 'both' }}>
-          <Link to="/login" className="submit-btn shimmer-btn" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', borderRadius: '999px', whiteSpace: 'nowrap' }}>
-            Start for Free <ArrowRight size={20} />
+          <Link to="/login" className="submit-btn shimmer-btn" style={{ padding: '0.9rem 2.2rem', whiteSpace: 'nowrap' }}>
+            Start for Free <ArrowRight size={18} />
           </Link>
-          <a href="#features" className="submit-btn" style={{ background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'none', borderRadius: '999px', whiteSpace: 'nowrap' }}>
-            <Play size={20} /> See Features
+          <a href="#features" className="submit-btn" style={{ background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'none', whiteSpace: 'nowrap' }}>
+            <Play size={18} /> See Features
           </a>
         </div>
       </main>
