@@ -37,7 +37,7 @@
 .navbar-center-links {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.8rem;
 }
 
 .nav-link-item {
@@ -52,6 +52,7 @@
   border-radius: 999px;
   transition: all 0.2s ease;
   border: 1px solid transparent;
+  white-space: nowrap;
 }
 
 .nav-link-item:hover {
