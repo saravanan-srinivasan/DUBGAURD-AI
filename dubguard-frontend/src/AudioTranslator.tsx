@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { Globe, UploadCloud, Loader2, FileAudio, Download, Sparkles } from 'lucide-react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from './firebase';
+import { useAuth } from './AuthContext';
 
 const AudioTranslator: React.FC = () => {
+  const { currentUser } = useAuth();
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [language, setLanguage] = useState('es');
   const [loading, setLoading] = useState(false);
   const [originalText, setOriginalText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [error, setError] = useState('');
 
   const handleGenerate = async () => {
     if (!audioFile) return;
     setLoading(true);
-    setError('');
     setOriginalText('');
     setTranslatedText('');
     setAudioUrl(null);
@@ -33,11 +36,31 @@ const AudioTranslator: React.FC = () => {
         setOriginalText(response.data.original_text);
         setTranslatedText(response.data.translated_text);
         if (response.data.audio_base64) {
-          setAudioUrl(`data:audio/mp3;base64,${response.data.audio_base64}`);
+          const audioSrc = `data:audio/mp3;base64,${response.data.audio_base64}`;
+          setAudioUrl(audioSrc);
+          toast.success("Translation complete!");
+
+          if (currentUser) {
+            try {
+              await addDoc(collection(db, 'generations'), {
+                userId: currentUser.uid,
+                type: 'translation',
+                timestamp: Date.now(),
+                data: {
+                  language: language,
+                  originalText: response.data.original_text,
+                  translatedText: response.data.translated_text,
+                  audioUrl: audioSrc
+                }
+              });
+            } catch (e) {
+              console.error("Failed to save to history", e);
+            }
+          }
         }
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to translate audio.');
+      toast.error(err.response?.data?.detail || 'Failed to translate audio.');
     } finally {
       setLoading(false);
     }
@@ -52,11 +75,6 @@ const AudioTranslator: React.FC = () => {
       </header>
 
       <div className="upload-card glass-panel" style={{ padding: '2.5rem' }}>
-        {error && (
-          <div className="error-banner" style={{ marginBottom: '1.5rem' }}>
-            <span>{error}</span>
-          </div>
-        )}
         
         <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           

@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
-import { FileText, UploadCloud, Loader2, Sparkles, BookOpen } from 'lucide-react';
+import { FileText, UploadCloud, Loader2, Sparkles, BookOpen, Download } from 'lucide-react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
+import toast from 'react-hot-toast';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from './firebase';
+import { useAuth } from './AuthContext';
+import jsPDF from 'jspdf';
 
 const PodcastSummarizer: React.FC = () => {
+  const { currentUser } = useAuth();
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [summary, setSummary] = useState('');
-  const [error, setError] = useState('');
 
   const handleGenerate = async () => {
     if (!audioFile) return;
     setLoading(true);
-    setError('');
     setTranscript('');
     setSummary('');
 
@@ -29,12 +33,44 @@ const PodcastSummarizer: React.FC = () => {
       if (response.data) {
         setTranscript(response.data.transcript);
         setSummary(response.data.summary);
+        toast.success("Summary generated successfully!");
+
+        if (currentUser) {
+          try {
+            await addDoc(collection(db, 'generations'), {
+              userId: currentUser.uid,
+              type: 'summary',
+              timestamp: Date.now(),
+              data: {
+                summary: response.data.summary,
+              }
+            });
+          } catch (e) {
+            console.error("Failed to save to history", e);
+          }
+        }
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to summarize audio.');
+      toast.error(err.response?.data?.detail || 'Failed to summarize audio.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const exportToPDF = () => {
+    if (!summary) return;
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Podcast Executive Summary", 20, 20);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    
+    const splitText = doc.splitTextToSize(summary, 170);
+    doc.text(splitText, 20, 30);
+    doc.save("Podcast_Summary.pdf");
+    toast.success("PDF Downloaded");
   };
 
   return (
@@ -46,11 +82,6 @@ const PodcastSummarizer: React.FC = () => {
       </header>
 
       <div className="upload-card glass-panel" style={{ padding: '2.5rem' }}>
-        {error && (
-          <div className="error-banner" style={{ marginBottom: '1.5rem' }}>
-            <span>{error}</span>
-          </div>
-        )}
         
         <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           
@@ -90,6 +121,17 @@ const PodcastSummarizer: React.FC = () => {
                   </>
                 )}
               </button>
+
+              {summary && (
+                <button 
+                  onClick={exportToPDF} 
+                  className="submit-btn"
+                  style={{ background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'none' }}
+                >
+                  <Download size={20} />
+                  Export to PDF
+                </button>
+              )}
             </div>
           </div>
 

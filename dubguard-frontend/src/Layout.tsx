@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { ShieldCheck, Zap, LogOut, Mic, Globe, FileText, Activity, Music, Menu, X } from 'lucide-react';
+import { ShieldCheck, Zap, LogOut, Mic, Globe, FileText, Activity, Music, Menu, X, Clock } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase';
 import './Layout.css';
@@ -10,7 +10,8 @@ const Layout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { path: '/', label: 'Evaluate', icon: <ShieldCheck size={16} /> },
+    { path: '/evaluate', label: 'Evaluate', icon: <ShieldCheck size={16} /> },
+    { path: '/history', label: 'History', icon: <Clock size={16} /> },
     { path: '/voice-studio', label: 'Voice Studio', icon: <Mic size={16} /> },
     { path: '/translator', label: 'Translator', icon: <Globe size={16} /> },
     { path: '/summarizer', label: 'Summarizer', icon: <FileText size={16} /> },

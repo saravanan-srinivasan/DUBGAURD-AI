@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { Mic, Download, Loader2, Sparkles } from 'lucide-react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from './firebase';
+import { useAuth } from './AuthContext';
 
 const VoiceStudio: React.FC = () => {
+  const { currentUser } = useAuth();
   const [text, setText] = useState('');
   const [language, setLanguage] = useState('en');
   const [loading, setLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [error, setError] = useState('');
 
   const handleGenerate = async () => {
     if (!text.trim()) return;
     setLoading(true);
-    setError('');
     setAudioUrl(null);
 
     try {
@@ -23,10 +26,29 @@ const VoiceStudio: React.FC = () => {
       });
       
       if (response.data && response.data.audio_base64) {
-        setAudioUrl(`data:audio/mp3;base64,${response.data.audio_base64}`);
+        const audioSrc = `data:audio/mp3;base64,${response.data.audio_base64}`;
+        setAudioUrl(audioSrc);
+        toast.success("Voice generated successfully!");
+
+        if (currentUser) {
+          try {
+            await addDoc(collection(db, 'generations'), {
+              userId: currentUser.uid,
+              type: 'voice',
+              timestamp: Date.now(),
+              data: {
+                text: text,
+                language: language,
+                audioUrl: audioSrc
+              }
+            });
+          } catch (e) {
+            console.error("Failed to save to history", e);
+          }
+        }
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to generate voice. Ensure backend is running.');
+      toast.error(err.response?.data?.detail || 'Failed to generate voice.');
     } finally {
       setLoading(false);
     }
@@ -41,11 +63,6 @@ const VoiceStudio: React.FC = () => {
       </header>
 
       <div className="upload-card glass-panel" style={{ padding: '2.5rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-        {error && (
-          <div className="error-banner" style={{ marginBottom: '1.5rem' }}>
-            <span>{error}</span>
-          </div>
-        )}
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <textarea 

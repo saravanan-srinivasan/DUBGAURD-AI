@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Music, UploadCloud, Loader2, Play, Download, Sparkles, Mic, Radio } from 'lucide-react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const VocalIsolator: React.FC = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [vocalsUrl, setVocalsUrl] = useState('');
   const [backgroundUrl, setBackgroundUrl] = useState('');
-  const [error, setError] = useState('');
 
   const vocalsRef = useRef<HTMLAudioElement>(null);
   const backgroundRef = useRef<HTMLAudioElement>(null);
@@ -15,7 +15,6 @@ const VocalIsolator: React.FC = () => {
   const handleIsolate = async () => {
     if (!audioFile) return;
     setLoading(true);
-    setError('');
     setVocalsUrl('');
     setBackgroundUrl('');
 
@@ -31,9 +30,10 @@ const VocalIsolator: React.FC = () => {
       if (response.data) {
         setVocalsUrl(`data:audio/wav;base64,${response.data.vocals_base64}`);
         setBackgroundUrl(`data:audio/wav;base64,${response.data.background_base64}`);
+        toast.success("Tracks isolated successfully!");
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to isolate audio.');
+      toast.error(err.response?.data?.detail || 'Failed to isolate audio.');
     } finally {
       setLoading(false);
     }
@@ -57,11 +57,6 @@ const VocalIsolator: React.FC = () => {
       </header>
 
       <div className="upload-card glass-panel" style={{ padding: '2.5rem' }}>
-        {error && (
-          <div className="error-banner" style={{ marginBottom: '1.5rem' }}>
-            <span>{error}</span>
-          </div>
-        )}
         
         <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           

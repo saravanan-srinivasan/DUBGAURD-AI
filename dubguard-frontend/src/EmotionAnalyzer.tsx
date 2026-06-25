@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { Activity, UploadCloud, Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { Activity, UploadCloud, Loader2, Sparkles } from 'lucide-react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const EmotionAnalyzer: React.FC = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [primaryEmotion, setPrimaryEmotion] = useState('');
   const [emotions, setEmotions] = useState<Record<string, number>>({});
-  const [error, setError] = useState('');
 
   const handleAnalyze = async () => {
     if (!audioFile) return;
     setLoading(true);
-    setError('');
     setPrimaryEmotion('');
     setEmotions({});
 
@@ -28,9 +27,10 @@ const EmotionAnalyzer: React.FC = () => {
       if (response.data) {
         setPrimaryEmotion(response.data.primary_emotion);
         setEmotions(response.data.emotions);
+        toast.success("Emotion analysis complete!");
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to analyze emotion.');
+      toast.error(err.response?.data?.detail || 'Failed to analyze emotion.');
     } finally {
       setLoading(false);
     }
@@ -67,12 +67,6 @@ const EmotionAnalyzer: React.FC = () => {
       </header>
 
       <div className="upload-card glass-panel" style={{ padding: '2.5rem' }}>
-        {error && (
-          <div className="error-banner" style={{ marginBottom: '1.5rem' }}>
-            <AlertCircle size={20} />
-            <span>{error}</span>
-          </div>
-        )}
         
         <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           
