@@ -44,6 +44,7 @@ async def startup_event():
         emotion_service._load_model()
         speaker_service._load_model()
         
+        # Pre-load XTTS voice cloning model so it doesn't cause a 30s delay on the first API request
         from app.services.voice_cloning import voice_cloning_service
         voice_cloning_service._init_tts()
         
