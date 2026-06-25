@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mic, Download, Loader2, Sparkles, Plus, Trash2, Users } from 'lucide-react';
+import { Mic, Download, Loader2, Sparkles, Plus, Trash2, Users, Sliders } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { collection, addDoc } from 'firebase/firestore';
@@ -10,6 +10,8 @@ interface SpeakerBlock {
   id: string;
   text: string;
   language: string;
+  pitch: string;
+  rate: string;
 }
 
 const VoiceStudio: React.FC = () => {
@@ -19,15 +21,22 @@ const VoiceStudio: React.FC = () => {
   // Single Speaker State
   const [text, setText] = useState('');
   const [language, setLanguage] = useState('en');
+  const [pitch, setPitch] = useState('0');
+  const [rate, setRate] = useState('0');
   
   // Multi Speaker State
   const [blocks, setBlocks] = useState<SpeakerBlock[]>([
-    { id: '1', text: '', language: 'en' },
-    { id: '2', text: '', language: 'en' }
+    { id: '1', text: '', language: 'en', pitch: '0', rate: '0' },
+    { id: '2', text: '', language: 'en', pitch: '0', rate: '0' }
   ]);
 
   const [loading, setLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+
+  const formatEdgeValue = (val: string, unit: string) => {
+    const num = Number(val);
+    return `${num > 0 ? '+' : ''}${num}${unit}`;
+  };
 
   const handleGenerateSingle = async () => {
     if (!text.trim()) return;
@@ -38,7 +47,9 @@ const VoiceStudio: React.FC = () => {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const response = await axios.post(`${apiUrl}/api/v1/voice-studio`, {
         text,
-        language
+        language,
+        pitch: formatEdgeValue(pitch, 'Hz'),
+        rate: formatEdgeValue(rate, '%')
       });
       
       if (response.data && response.data.audio_base64) {
@@ -51,7 +62,7 @@ const VoiceStudio: React.FC = () => {
             userId: currentUser.uid,
             type: 'voice',
             timestamp: Date.now(),
-            data: { text, language, audioUrl: audioSrc }
+            data: { text, language, pitch, rate, audioUrl: audioSrc }
           }).catch((e) => console.error("Failed to save to history", e));
         }
       }
@@ -74,7 +85,12 @@ const VoiceStudio: React.FC = () => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const response = await axios.post(`${apiUrl}/api/v1/voice-studio-multi`, {
-        blocks: validBlocks.map(b => ({ text: b.text, language: b.language }))
+        blocks: validBlocks.map(b => ({ 
+          text: b.text, 
+          language: b.language,
+          pitch: formatEdgeValue(b.pitch, 'Hz'),
+          rate: formatEdgeValue(b.rate, '%')
+        }))
       });
       
       if (response.data && response.data.audio_base64) {
@@ -99,7 +115,7 @@ const VoiceStudio: React.FC = () => {
   };
 
   const addBlock = () => {
-    setBlocks([...blocks, { id: Date.now().toString(), text: '', language: 'en' }]);
+    setBlocks([...blocks, { id: Date.now().toString(), text: '', language: 'en', pitch: '0', rate: '0' }]);
   };
 
   const removeBlock = (id: string) => {
@@ -107,7 +123,7 @@ const VoiceStudio: React.FC = () => {
     setBlocks(blocks.filter(b => b.id !== id));
   };
 
-  const updateBlock = (id: string, field: 'text' | 'language', value: string) => {
+  const updateBlock = (id: string, field: 'text' | 'language' | 'pitch' | 'rate', value: string) => {
     setBlocks(blocks.map(b => b.id === id ? { ...b, [field]: value } : b));
   };
 
@@ -127,6 +143,25 @@ const VoiceStudio: React.FC = () => {
       <option value="te">Telugu (IN)</option>
       <option value="hi">Hindi (IN)</option>
     </select>
+  );
+
+  const ToneControls = ({ p, r, onPChange, onRChange }: { p: string, r: string, onPChange: (val: string) => void, onRChange: (val: string) => void }) => (
+    <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem', background: 'rgba(255,255,255,0.02)', padding: '1rem 1.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', flexWrap: 'wrap' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '150px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Sliders size={14} /> Pitch (Tone)</span>
+          <span>{Number(p) > 0 ? '+' : ''}{p}Hz</span>
+        </div>
+        <input type="range" min="-50" max="50" value={p} onChange={(e) => onPChange(e.target.value)} style={{ width: '100%', accentColor: '#a855f7' }} />
+      </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '150px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Sliders size={14} /> Speed (Rate)</span>
+          <span>{Number(r) > 0 ? '+' : ''}{r}%</span>
+        </div>
+        <input type="range" min="-50" max="50" value={r} onChange={(e) => onRChange(e.target.value)} style={{ width: '100%', accentColor: '#ec4899' }} />
+      </div>
+    </div>
   );
 
   return (
@@ -166,7 +201,9 @@ const VoiceStudio: React.FC = () => {
               style={{ minHeight: '180px', fontSize: '1rem', lineHeight: '1.6' }}
             />
             
-            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <ToneControls p={pitch} r={rate} onPChange={setPitch} onRChange={setRate} />
+            
+            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '0.5rem' }}>
               <div style={{ flex: 1 }}>
                 <LanguageSelect value={language} onChange={setLanguage} />
               </div>
@@ -185,9 +222,9 @@ const VoiceStudio: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.3s ease-out' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {blocks.map((block, index) => (
-                <div key={block.id} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div key={block.id} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', flexWrap: 'wrap' }}>
                   <div style={{ flexShrink: 0, padding: '0.85rem 0', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>#{index + 1}</div>
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '100%' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
                       <LanguageSelect value={block.language} onChange={(val) => updateBlock(block.id, 'language', val)} />
                       <button onClick={() => removeBlock(block.id)} disabled={blocks.length <= 1} style={{ background: 'transparent', border: 'none', color: blocks.length > 1 ? '#ef4444' : 'rgba(255,255,255,0.2)', cursor: blocks.length > 1 ? 'pointer' : 'not-allowed', padding: '0.5rem' }}>
@@ -200,6 +237,12 @@ const VoiceStudio: React.FC = () => {
                       onChange={(e) => updateBlock(block.id, 'text', e.target.value)}
                       className="text-input"
                       style={{ minHeight: '80px', fontSize: '0.95rem' }}
+                    />
+                    <ToneControls 
+                      p={block.pitch} 
+                      r={block.rate} 
+                      onPChange={(val) => updateBlock(block.id, 'pitch', val)} 
+                      onRChange={(val) => updateBlock(block.id, 'rate', val)} 
                     />
                   </div>
                 </div>

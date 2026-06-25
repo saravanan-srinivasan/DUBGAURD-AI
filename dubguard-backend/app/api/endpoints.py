@@ -123,11 +123,18 @@ import base64
 class VoiceStudioRequest(BaseModel):
     text: str
     language: str = "en"
+    pitch: str = "+0Hz"
+    rate: str = "+0%"
 
 @router.post("/voice-studio")
 async def voice_studio(request: VoiceStudioRequest):
     try:
-        audio_path, _ = await auto_correction_service.generate_tts(request.text, target_lang=request.language)
+        audio_path, _ = await auto_correction_service.generate_tts(
+            request.text, 
+            target_lang=request.language,
+            pitch=request.pitch,
+            rate=request.rate
+        )
         if not audio_path or not os.path.exists(audio_path):
             raise HTTPException(status_code=500, detail="Failed to generate audio.")
             
@@ -297,6 +304,8 @@ from typing import List
 class MultiSpeakerBlock(BaseModel):
     text: str
     language: str
+    pitch: str = "+0Hz"
+    rate: str = "+0%"
 
 class MultiSpeakerRequest(BaseModel):
     blocks: List[MultiSpeakerBlock]
@@ -304,7 +313,7 @@ class MultiSpeakerRequest(BaseModel):
 @router.post("/voice-studio-multi")
 async def voice_studio_multi(request: MultiSpeakerRequest):
     try:
-        blocks_dict = [{"text": b.text, "language": b.language} for b in request.blocks]
+        blocks_dict = [{"text": b.text, "language": b.language, "pitch": b.pitch, "rate": b.rate} for b in request.blocks]
         audio_path = await auto_correction_service.generate_multi_speaker_tts(blocks_dict)
         
         if not audio_path or not os.path.exists(audio_path):

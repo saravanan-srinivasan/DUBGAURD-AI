@@ -197,13 +197,13 @@ CRITICAL RULES:
             logger.error(f"Groq API error: {e}")
             return dubbed_transcript
 
-    async def generate_tts(self, text: str, target_lang: str = 'en') -> tuple[str, str]:
+    async def generate_tts(self, text: str, target_lang: str = 'en', pitch: str = '+0Hz', rate: str = '+0%') -> tuple[str, str]:
         """Generates TTS audio for the given text in the target language. Translates if necessary."""
         output_filename = f"tts_{uuid.uuid4().hex[:8]}.mp3"
         temp_dir = tempfile.gettempdir()
         output_path = os.path.join(temp_dir, output_filename)
         
-        logger.info(f"Generating TTS audio for text in {target_lang}")
+        logger.info(f"Generating TTS audio for text in {target_lang} with pitch {pitch} and rate {rate}")
         
         try:
             # 1. Always translate to the target language
@@ -219,7 +219,7 @@ CRITICAL RULES:
             logger.info(f"Using voice: {voice} for language: {target_lang}")
             
             # 3. Generate Audio with Edge-TTS
-            communicate = edge_tts.Communicate(final_text, voice)
+            communicate = edge_tts.Communicate(final_text, voice, pitch=pitch, rate=rate)
             await communicate.save(output_path)
             
             return output_path, final_text
@@ -244,6 +244,8 @@ CRITICAL RULES:
             for i, block in enumerate(blocks):
                 text = block.get('text', '')
                 target_lang = block.get('language', 'en')
+                pitch = block.get('pitch', '+0Hz')
+                rate = block.get('rate', '+0%')
                 if not text.strip():
                     continue
                     
@@ -251,7 +253,7 @@ CRITICAL RULES:
                 voice = VOICE_MAP.get(target_lang, 'en-US-JennyNeural')
                 
                 block_filename = os.path.join(temp_dir, f"block_{i}_{uuid.uuid4().hex[:4]}.mp3")
-                communicate = edge_tts.Communicate(text, voice)
+                communicate = edge_tts.Communicate(text, voice, pitch=pitch, rate=rate)
                 await communicate.save(block_filename)
                 
                 # Append to combined audio (with 0.5s pause between speakers)
