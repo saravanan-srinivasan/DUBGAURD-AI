@@ -136,14 +136,14 @@ const VoiceClone: React.FC = () => {
         </div>
 
         <button 
-          className="btn-primary"
+          className="submit-btn shimmer-btn"
           onClick={handleClone}
           disabled={isCloning}
           style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem', opacity: isCloning ? 0.7 : 1, cursor: isCloning ? 'not-allowed' : 'pointer' }}
         >
           {isCloning ? (
             <>
-              <Loader2 size={20} className="spin" />
+              <Loader2 size={20} className="spinner" />
               Cloning Voice...
             </>
           ) : (
