@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Music, UploadCloud, Loader2, Play, Download } from 'lucide-react';
+import { Music, UploadCloud, Loader2, Play, Download, Sparkles, Mic, Radio } from 'lucide-react';
 import axios from 'axios';
 
 const VocalIsolator: React.FC = () => {
@@ -53,57 +53,100 @@ const VocalIsolator: React.FC = () => {
       <header className="header animate-fade-in">
         <div className="hero-badge"><Music size={14} /> Source Separation</div>
         <h1>Vocal <span className="gradient-text">Isolator</span></h1>
-        <p>Extract pure vocals and background instrumentals from any audio track using DSP.</p>
+        <p>Extract pure vocals and background instrumentals from any audio track using advanced DSP algorithms.</p>
       </header>
 
-      <div className="upload-card glass-panel" style={{ padding: '2rem' }}>
-        {error && <div className="error-message" style={{ color: 'var(--error)', marginBottom: '1rem', background: 'rgba(239, 68, 68, 0.1)', padding: '1rem', borderRadius: '8px' }}>{error}</div>}
+      <div className="upload-card glass-panel" style={{ padding: '2.5rem' }}>
+        {error && (
+          <div className="error-banner" style={{ marginBottom: '1.5rem' }}>
+            <span>{error}</span>
+          </div>
+        )}
         
         <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           
-          <div style={{ flex: '1 1 300px' }}>
-            <div className="upload-box" style={{ padding: '2rem', textAlign: 'center', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', cursor: 'pointer' }}>
-              <input type="file" accept="audio/*" id="audio-upload" style={{ display: 'none' }} onChange={(e) => setAudioFile(e.target.files?.[0] || null)} />
-              <label htmlFor="audio-upload" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                <UploadCloud size={40} style={{ color: 'var(--accent)' }} />
-                <span>{audioFile ? audioFile.name : 'Click to select audio file'}</span>
+          <div style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className={`upload-zone ${audioFile ? 'has-file' : ''}`}>
+              <input 
+                type="file" 
+                accept="audio/*" 
+                id="audio-upload" 
+                style={{ display: 'none' }} 
+                onChange={(e) => setAudioFile(e.target.files?.[0] || null)} 
+              />
+              <label htmlFor="audio-upload" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', width: '100%' }}>
+                <UploadCloud size={48} className="upload-icon" />
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
+                  <span className="upload-title">{audioFile ? audioFile.name : 'Drag & drop audio or click to browse'}</span>
+                  {!audioFile && <span className="upload-hint">Supports MP3, WAV, M4A up to 25MB</span>}
+                </div>
               </label>
             </div>
 
-            <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <button 
                 onClick={handleIsolate} 
                 disabled={loading || !audioFile}
-                className="shimmer-btn"
-                style={{ padding: '1rem', border: 'none', borderRadius: '8px', background: 'var(--accent)', color: 'white', fontWeight: 600, cursor: loading || !audioFile ? 'not-allowed' : 'pointer', opacity: loading || !audioFile ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                className="submit-btn shimmer-btn"
               >
-                {loading ? <Loader2 className="spinner" size={20} /> : <Music size={20} />}
-                {loading ? 'Splitting Tracks...' : 'Isolate Vocals'}
+                {loading ? (
+                  <>
+                    <Loader2 className="spinner" size={20} />
+                    Splitting Audio Tracks...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={20} />
+                    Isolate Vocals
+                  </>
+                )}
               </button>
             </div>
           </div>
 
           {(vocalsUrl || backgroundUrl) && (
-            <div style={{ flex: '1 1 400px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ flex: '1 1 450px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }} className="animate-fade-in">
               
               {vocalsUrl && (
-                <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', borderLeft: '4px solid #8b5cf6' }}>
-                  <h3 style={{ fontSize: '1.1rem', color: '#8b5cf6', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>🎤 Isolated Vocals</h3>
-                  <audio ref={vocalsRef} controls src={vocalsUrl} style={{ width: '100%' }} />
-                  <a href={vocalsUrl} download="vocals.wav" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}><Download size={16} /> Download Vocals</a>
+                <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', borderLeft: '4px solid #a855f7' }}>
+                  <h3 style={{ fontSize: '1.1rem', color: '#a855f7', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0' }}>
+                    <Mic size={18} /> Isolated Vocals
+                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <audio ref={vocalsRef} controls src={vocalsUrl} style={{ flex: 1, height: '40px' }} />
+                    <a href={vocalsUrl} download="vocals.wav" className="download-btn" style={{ padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.1)', boxShadow: 'none' }}>
+                      <Download size={18} />
+                    </a>
+                  </div>
                 </div>
               )}
 
               {backgroundUrl && (
-                <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', borderLeft: '4px solid #10b981' }}>
-                  <h3 style={{ fontSize: '1.1rem', color: '#10b981', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>🥁 Instrumental / Beats</h3>
-                  <audio ref={backgroundRef} controls src={backgroundUrl} style={{ width: '100%' }} />
-                  <a href={backgroundUrl} download="instrumental.wav" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}><Download size={16} /> Download Instrumental</a>
+                <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', borderLeft: '4px solid #10b981' }}>
+                  <h3 style={{ fontSize: '1.1rem', color: '#10b981', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0' }}>
+                    <Radio size={18} /> Instrumental / Beats
+                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <audio ref={backgroundRef} controls src={backgroundUrl} style={{ flex: 1, height: '40px' }} />
+                    <a href={backgroundUrl} download="instrumental.wav" className="download-btn" style={{ padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.1)', boxShadow: 'none' }}>
+                      <Download size={18} />
+                    </a>
+                  </div>
                 </div>
               )}
 
-              <button onClick={playTogether} style={{ padding: '0.75rem', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', background: 'transparent', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <Play size={18} /> Play Together
+              <button 
+                onClick={playTogether} 
+                style={{ 
+                  padding: '1rem', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', 
+                  background: 'rgba(255,255,255,0.05)', color: 'white', display: 'flex', 
+                  alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer',
+                  fontWeight: 600, transition: 'all 0.2s', marginTop: '0.5rem'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+              >
+                <Play size={18} /> Play Both Tracks Together
               </button>
             </div>
           )}
