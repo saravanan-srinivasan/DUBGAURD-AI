@@ -44,7 +44,7 @@ const VoiceClone: React.FC = () => {
 
     setIsCloning(true);
     setAudioUrl(null);
-    const toastId = toast.loading('Initializing Voice Clone Model (This can take 30-60s)...');
+    const toastId = toast.loading('Generating cloned voice...');
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'https://shravan2020-dubguard-backend.hf.space';
