@@ -67,12 +67,6 @@ async def evaluate_dubbing(
         if dubbed_video_path:
             lip_sync_eval = await asyncio.to_thread(lip_sync_service.analyze, dubbed_video_path)
 
-        # Clean up temp files
-        os.remove(orig_audio_path)
-        os.remove(dubbed_audio_path)
-        if dubbed_video_path:
-            os.remove(dubbed_video_path)
-
         # Aggregate Results
         detailed_metrics = {
             "speech_evaluation": speech_eval,
@@ -104,6 +98,17 @@ async def evaluate_dubbing(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        # Clean up temp files safely at the very end
+        try:
+            if 'orig_audio_path' in locals() and os.path.exists(orig_audio_path):
+                os.remove(orig_audio_path)
+            if 'dubbed_audio_path' in locals() and os.path.exists(dubbed_audio_path):
+                os.remove(dubbed_audio_path)
+            if 'dubbed_video_path' in locals() and dubbed_video_path and os.path.exists(dubbed_video_path):
+                os.remove(dubbed_video_path)
+        except Exception:
+            pass
 
 from fastapi.responses import FileResponse
 

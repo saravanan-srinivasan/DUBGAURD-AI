@@ -277,8 +277,12 @@ CRITICAL RULES:
         
         logger.info(f"Generating Edge-TTS audio for: {fixed_text}")
         try:
-            import langdetect
-            lang = langdetect.detect(fixed_text)
+            lang = 'en'
+            try:
+                import langdetect
+                lang = langdetect.detect(fixed_text)
+            except Exception as e:
+                logger.warning(f"langdetect failed, defaulting to 'en': {e}")
             
             voice_map = {
                 'en': 'en-US-JennyNeural',
@@ -295,12 +299,15 @@ CRITICAL RULES:
             
             # Stem Mixing
             if orig_audio_path and os.path.exists(orig_audio_path):
-                logger.info("Extracting background music with Demucs...")
-                import subprocess
-                subprocess.run([
-                    "demucs", "--two-stems=vocals", 
-                    orig_audio_path, "-o", temp_dir
-                ], check=False)
+                try:
+                    logger.info("Extracting background music with Demucs...")
+                    import subprocess
+                    subprocess.run([
+                        "demucs", "--two-stems=vocals", 
+                        orig_audio_path, "-o", temp_dir
+                    ], check=False)
+                except Exception as e:
+                    logger.warning(f"Demucs processing failed or not installed, skipping stem mixing: {e}")
                 
                 # demucs outputs to: {temp_dir}/htdemucs/{basename}/no_vocals.wav
                 basename = os.path.splitext(os.path.basename(orig_audio_path))[0]
@@ -378,8 +385,8 @@ CRITICAL RULES:
             logger.info("Issues detected! Triggering Active Auto-Correction Engine...")
             corrected_transcript = self.fix_transcript_with_llm(original_transcript, translated_transcript, issues)
             
-            # If the LLM successfully changed the text, generate new audio
-            if corrected_transcript and corrected_transcript != translated_transcript:
+            # Always generate new audio to fix pronunciation/emotion/quality issues
+            if corrected_transcript:
                 corrected_audio_path = await self.generate_corrected_audio(corrected_transcript, orig_audio_path)
 
         return {
