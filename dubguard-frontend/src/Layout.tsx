@@ -47,6 +47,13 @@ const Layout: React.FC = () => {
             </Link>
           ))}
           <button 
+            onClick={() => { setVoiceModalOpen(true); setMobileMenuOpen(false); }}
+            className="logout-btn mobile-logout-btn"
+            style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#c084fc', border: '1px solid rgba(168, 85, 247, 0.3)', marginBottom: '0.5rem' }}
+          >
+            <Mic size={16} /> My Voice (Beta)
+          </button>
+          <button 
             onClick={() => signOut(auth)}
             className="logout-btn mobile-logout-btn"
           >
