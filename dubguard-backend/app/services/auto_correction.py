@@ -80,7 +80,7 @@ Text to translate: {text}"""
         try:
             response = self.groq_client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
-                model="llama-3.3-70b-versatile",
+                model="llama-3.1-8b-instant",
                 temperature=0.2,
                 max_tokens=4096
             )
@@ -112,7 +112,7 @@ Transcript:
         try:
             response = self.groq_client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
-                model="llama-3.3-70b-versatile",
+                model="llama-3.1-8b-instant",
                 temperature=0.4,
                 max_tokens=4096
             )
@@ -141,7 +141,7 @@ Transcript:
         try:
             response = self.groq_client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
-                model="llama-3.3-70b-versatile",
+                model="llama-3.1-8b-instant",
                 temperature=0.6,
                 max_tokens=4096,
                 response_format={"type": "json_object"}
@@ -190,7 +190,7 @@ CRITICAL RULES:
             logger.info("Calling Groq LLM for transcript auto-correction...")
             chat_completion = self.groq_client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
-                model="llama-3.3-70b-versatile",
+                model="llama-3.1-8b-instant",
                 max_tokens=4096
             )
             return chat_completion.choices[0].message.content.strip()
