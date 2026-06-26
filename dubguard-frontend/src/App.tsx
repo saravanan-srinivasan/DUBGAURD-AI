@@ -15,6 +15,8 @@ import VocalIsolator from './VocalIsolator';
 import VoiceClone from './VoiceClone';
 import './index.css';
 
+import { VoiceProvider } from './VoiceContext';
+
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser } = useAuth();
@@ -29,40 +31,42 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Toaster 
-          position="bottom-right" 
-          toastOptions={{ 
-            style: { 
-              background: '#0d1117', 
-              color: '#fff', 
-              border: '1px solid rgba(255,255,255,0.1)' 
-            } 
-          }} 
-        />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route 
-            path="/" 
-            element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            } 
-          >
-            <Route path="evaluate" element={<DubGuardApp />} />
-            <Route path="history" element={<History />} />
-            <Route path="voice-studio" element={<VoiceStudio />} />
-            <Route path="translator" element={<AudioTranslator />} />
-            <Route path="summarizer" element={<PodcastSummarizer />} />
-            <Route path="emotion" element={<EmotionAnalyzer />} />
-            <Route path="isolator" element={<VocalIsolator />} />
-            <Route path="voice-clone" element={<VoiceClone />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+      <VoiceProvider>
+        <BrowserRouter>
+          <Toaster 
+            position="bottom-right" 
+            toastOptions={{ 
+              style: { 
+                background: '#0d1117', 
+                color: '#fff', 
+                border: '1px solid rgba(255,255,255,0.1)' 
+              } 
+            }} 
+          />
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route 
+              path="/" 
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              } 
+            >
+              <Route path="evaluate" element={<DubGuardApp />} />
+              <Route path="history" element={<History />} />
+              <Route path="voice-studio" element={<VoiceStudio />} />
+              <Route path="translator" element={<AudioTranslator />} />
+              <Route path="summarizer" element={<PodcastSummarizer />} />
+              <Route path="emotion" element={<EmotionAnalyzer />} />
+              <Route path="isolator" element={<VocalIsolator />} />
+              <Route path="voice-clone" element={<VoiceClone />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </VoiceProvider>
     </AuthProvider>
   );
 }

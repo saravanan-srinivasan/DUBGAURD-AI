@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { useAuth } from './AuthContext';
+import { useVoiceContext } from './VoiceContext';
 
 interface SpeakerBlock {
   id: string;
@@ -53,6 +54,7 @@ const ToneControls = ({ p, r, onPChange, onRChange }: { p: string, r: string, on
 
 const VoiceStudio: React.FC = () => {
   const { currentUser } = useAuth();
+  const { globalVoiceEnabled, globalVoiceFile } = useVoiceContext();
   const [isMultiSpeaker, setIsMultiSpeaker] = useState(false);
   
   // Single Speaker State
@@ -82,11 +84,19 @@ const VoiceStudio: React.FC = () => {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const response = await axios.post(`${apiUrl}/api/v1/voice-studio`, {
-        text,
-        language,
-        pitch: formatEdgeValue(pitch, 'Hz'),
-        rate: formatEdgeValue(rate, '%')
+      
+      const formData = new FormData();
+      formData.append('text', text);
+      formData.append('language', language);
+      formData.append('pitch', formatEdgeValue(pitch, 'Hz'));
+      formData.append('rate', formatEdgeValue(rate, '%'));
+      
+      if (globalVoiceEnabled && globalVoiceFile) {
+        formData.append('custom_voice', globalVoiceFile);
+      }
+
+      const response = await axios.post(`${apiUrl}/api/v1/voice-studio`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       
       if (response.data && response.data.audio_base64) {

@@ -5,9 +5,11 @@ import toast from 'react-hot-toast';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { useAuth } from './AuthContext';
+import { useVoiceContext } from './VoiceContext';
 
 const AudioTranslator: React.FC = () => {
   const { currentUser } = useAuth();
+  const { globalVoiceEnabled, globalVoiceFile } = useVoiceContext();
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [language, setLanguage] = useState('es');
   const [loading, setLoading] = useState(false);
@@ -27,6 +29,10 @@ const AudioTranslator: React.FC = () => {
       const formData = new FormData();
       formData.append('audio', audioFile);
       formData.append('target_language', language);
+      
+      if (globalVoiceEnabled && globalVoiceFile) {
+        formData.append('custom_voice', globalVoiceFile);
+      }
 
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const response = await axios.post(`${apiUrl}/api/v1/translator`, formData, {

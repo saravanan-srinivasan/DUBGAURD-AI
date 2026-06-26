@@ -135,14 +135,48 @@ def format_edge_value(val: str, fallback: str) -> str:
     return val
 
 @router.post("/voice-studio")
-async def voice_studio(request: VoiceStudioRequest):
+async def voice_studio(
+    text: str = Form(...),
+    language: str = Form("en"),
+    pitch: str = Form("+0Hz"),
+    rate: str = Form("+0%"),
+    custom_voice: UploadFile = File(None)
+):
     try:
-        audio_path, _ = await auto_correction_service.generate_tts(
-            request.text, 
-            target_lang=request.language,
-            pitch=format_edge_value(request.pitch, '+0Hz'),
-            rate=format_edge_value(request.rate, '+0%')
-        )
+        supported_clone_langs = ['en', 'fr', 'pt']
+        if custom_voice and language in supported_clone_langs:
+            import tempfile
+            import shutil
+            import uuid
+            
+            temp_dir = tempfile.gettempdir()
+            ref_path = os.path.join(temp_dir, f"ref_studio_{uuid.uuid4().hex[:8]}.wav")
+            
+            with open(ref_path, "wb") as buffer:
+                shutil.copyfileobj(custom_voice.file, buffer)
+                
+            from app.services.voice_cloning import voice_cloning_service
+            import asyncio
+            
+            loop = asyncio.get_event_loop()
+            audio_path = await loop.run_in_executor(
+                None, 
+                voice_cloning_service.clone_voice, 
+                text, ref_path, language
+            )
+            
+            try:
+                os.remove(ref_path)
+            except:
+                pass
+        else:
+            audio_path, _ = await auto_correction_service.generate_tts(
+                text, 
+                target_lang=language,
+                pitch=format_edge_value(pitch, '+0Hz'),
+                rate=format_edge_value(rate, '+0%')
+            )
+            
         if not audio_path or not os.path.exists(audio_path):
             raise HTTPException(status_code=500, detail="Failed to generate audio.")
             
@@ -157,7 +191,8 @@ async def voice_studio(request: VoiceStudioRequest):
 @router.post("/translator")
 async def audio_translator(
     audio: UploadFile = File(...),
-    target_language: str = Form("en")
+    target_language: str = Form("en"),
+    custom_voice: UploadFile = File(None)
 ):
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
@@ -171,7 +206,35 @@ async def audio_translator(
 
         translated_text = auto_correction_service.translate_with_llm(original_transcript, target_language)
 
-        tts_path, _ = await auto_correction_service.generate_tts(translated_text, target_lang=target_language)
+        supported_clone_langs = ['en', 'fr', 'pt']
+        if custom_voice and target_language in supported_clone_langs:
+            import tempfile
+            import shutil
+            import uuid
+            
+            temp_dir = tempfile.gettempdir()
+            ref_path = os.path.join(temp_dir, f"ref_trans_{uuid.uuid4().hex[:8]}.wav")
+            
+            with open(ref_path, "wb") as buffer:
+                shutil.copyfileobj(custom_voice.file, buffer)
+                
+            from app.services.voice_cloning import voice_cloning_service
+            import asyncio
+            
+            loop = asyncio.get_event_loop()
+            tts_path = await loop.run_in_executor(
+                None, 
+                voice_cloning_service.clone_voice, 
+                translated_text, ref_path, target_language
+            )
+            
+            try:
+                os.remove(ref_path)
+            except:
+                pass
+        else:
+            tts_path, _ = await auto_correction_service.generate_tts(translated_text, target_lang=target_language)
+            
         if not tts_path or not os.path.exists(tts_path):
             raise HTTPException(status_code=500, detail="Failed to generate translated audio.")
             
