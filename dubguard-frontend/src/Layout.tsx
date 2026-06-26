@@ -47,13 +47,6 @@ const Layout: React.FC = () => {
             </Link>
           ))}
           <button 
-            onClick={() => setVoiceModalOpen(true)}
-            className="nav-link-item"
-            style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--accent)' }}
-          >
-            <Mic size={16} /> <span className="nav-link-text">My Voice (Beta)</span>
-          </button>
-          <button 
             onClick={() => signOut(auth)}
             className="logout-btn mobile-logout-btn"
           >
