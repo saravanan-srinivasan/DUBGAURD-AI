@@ -37,3 +37,4 @@ httpx
 
 langdetect
 TTS
+scikit-learn==1.3.2
