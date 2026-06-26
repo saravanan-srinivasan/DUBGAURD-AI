@@ -3,9 +3,25 @@ import { UploadCloud, Play, Loader2, Sparkles, Download, Volume2 } from 'lucide-
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const LanguageSelect = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => (
+  <select 
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    className="text-input"
+    style={{ minHeight: 'auto', padding: '0.85rem 1rem', cursor: 'pointer', maxWidth: '100%', marginBottom: '1rem' }}
+  >
+    <option value="en">English</option>
+    <option value="fr">French</option>
+    <option value="de">German</option>
+    <option value="pt">Portuguese</option>
+    <option value="pl">Polish</option>
+  </select>
+);
+
 const VoiceClone: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState('');
+  const [language, setLanguage] = useState('en');
   const [isCloning, setIsCloning] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -51,7 +67,7 @@ const VoiceClone: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('text', text);
-      formData.append('language', 'en'); 
+      formData.append('language', language); 
 
       const response = await axios.post(`${apiUrl}/api/v1/voice-clone`, formData, {
         headers: {
@@ -129,14 +145,15 @@ const VoiceClone: React.FC = () => {
             <div>
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'white', fontSize: '1.2rem' }}>
                 <Sparkles size={20} style={{ color: 'var(--accent)' }} />
-                2. Enter Text to Synthesize
+                2. Enter Text & Select Language
               </h3>
+              <LanguageSelect value={language} onChange={setLanguage} />
               <textarea
                 className="text-input"
                 placeholder="Type what you want the cloned voice to say..."
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                style={{ width: '100%', resize: 'vertical', minHeight: '200px', boxSizing: 'border-box' }}
+                style={{ width: '100%', resize: 'vertical', minHeight: '150px', boxSizing: 'border-box' }}
               />
             </div>
 

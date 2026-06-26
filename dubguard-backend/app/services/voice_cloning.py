@@ -52,13 +52,16 @@ class VoiceCloningService:
         logger.info(f"Translating text for voice clone to {language}...")
         final_text = auto_correction_service.translate_with_llm(text, language)
 
-        logger.info(f"Generating cloned voice with YourTTS... (Text length: {len(final_text)})")
+        supported_langs = ['en', 'fr', 'de', 'pt', 'pl']
+        tts_lang = language if language in supported_langs else 'en'
+
+        logger.info(f"Generating cloned voice with YourTTS... (Text length: {len(final_text)}, lang: {tts_lang})")
         try:
             self.tts.tts_to_file(
                 text=final_text,
                 file_path=output_path,
                 speaker_wav=reference_audio_path,
-                language="en"  # YourTTS supports en, fr, de, pt, pl
+                language=tts_lang  # YourTTS supports en, fr, de, pt, pl
             )
             logger.info(f"Cloned audio saved to {output_path}")
             return output_path
