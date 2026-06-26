@@ -1,5 +1,9 @@
 import os
 import tempfile
+import shutil
+import uuid
+import asyncio
+import base64
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from app.api.models import EvaluationResponse
 from app.services.speech_evaluation import speech_eval_service
@@ -11,6 +15,7 @@ from app.services.lip_sync_analysis import lip_sync_service
 from app.services.audio_quality_analysis import audio_quality_service
 from app.services.auto_correction import auto_correction_service
 from app.services.vocal_isolator import vocal_isolator_service
+from app.services.voice_cloning import voice_cloning_service
 
 router = APIRouter()
 
@@ -145,19 +150,12 @@ async def voice_studio(
     try:
         supported_clone_langs = ['en', 'fr', 'pt']
         if custom_voice and language in supported_clone_langs:
-            import tempfile
-            import shutil
-            import uuid
-            
             temp_dir = tempfile.gettempdir()
             ref_path = os.path.join(temp_dir, f"ref_studio_{uuid.uuid4().hex[:8]}.wav")
             
             with open(ref_path, "wb") as buffer:
                 shutil.copyfileobj(custom_voice.file, buffer)
                 
-            from app.services.voice_cloning import voice_cloning_service
-            import asyncio
-            
             loop = asyncio.get_event_loop()
             audio_path = await loop.run_in_executor(
                 None, 
@@ -208,19 +206,12 @@ async def audio_translator(
 
         supported_clone_langs = ['en', 'fr', 'pt']
         if custom_voice and target_language in supported_clone_langs:
-            import tempfile
-            import shutil
-            import uuid
-            
             temp_dir = tempfile.gettempdir()
             ref_path = os.path.join(temp_dir, f"ref_trans_{uuid.uuid4().hex[:8]}.wav")
             
             with open(ref_path, "wb") as buffer:
                 shutil.copyfileobj(custom_voice.file, buffer)
                 
-            from app.services.voice_cloning import voice_cloning_service
-            import asyncio
-            
             loop = asyncio.get_event_loop()
             tts_path = await loop.run_in_executor(
                 None, 

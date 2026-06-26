@@ -756,19 +756,6 @@ li { line-height: 1.6; color: var(--text-secondary); }
 }
 
 @media (max-width: 900px) {
-  .navbar { padding: 0 1.5rem; flex-wrap: wrap; height: auto; min-height: 64px; }
-  .navbar-links .nav-badge { display: none; }
-  .navbar-links {
-    overflow-x: auto;
-    width: 100%;
-    padding-bottom: 0.5rem;
-    padding-top: 0.5rem;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  .navbar-links::-webkit-scrollbar {
-    display: none;
-  }
   .responsive-grid-2,
   .responsive-grid-sidebar {
     grid-template-columns: 1fr;
