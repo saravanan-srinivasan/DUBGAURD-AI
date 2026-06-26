@@ -47,10 +47,15 @@ class VoiceCloningService:
         output_filename = f"cloned_{uuid.uuid4().hex[:8]}.wav"
         output_path = os.path.join(temp_dir, output_filename)
 
-        logger.info(f"Generating cloned voice with YourTTS... (Text length: {len(text)})")
+        from app.services.auto_correction import auto_correction_service
+        
+        logger.info(f"Translating text for voice clone to {language}...")
+        final_text = auto_correction_service.translate_with_llm(text, language)
+
+        logger.info(f"Generating cloned voice with YourTTS... (Text length: {len(final_text)})")
         try:
             self.tts.tts_to_file(
-                text=text,
+                text=final_text,
                 file_path=output_path,
                 speaker_wav=reference_audio_path,
                 language="en"  # YourTTS supports en, fr, de, pt, pl
