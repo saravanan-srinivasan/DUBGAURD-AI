@@ -201,14 +201,14 @@ const AudioTranslator: React.FC = () => {
                 {originalText && (
                   <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
                     <h3 style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Original</h3>
-                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-primary)' }}>{originalText}</p>
+                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-primary)', wordBreak: 'break-word', overflowWrap: 'break-word' }}>{originalText}</p>
                   </div>
                 )}
 
                 {translatedText && (
                   <div style={{ padding: '1.5rem', background: 'rgba(99,102,241,0.05)', borderRadius: '12px', border: '1px solid rgba(99,102,241,0.2)' }}>
                     <h3 style={{ fontSize: '0.85rem', color: '#a5b4fc', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Translated</h3>
-                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-primary)' }}>{translatedText}</p>
+                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-primary)', wordBreak: 'break-word', overflowWrap: 'break-word' }}>{translatedText}</p>
                   </div>
                 )}
               </div>
