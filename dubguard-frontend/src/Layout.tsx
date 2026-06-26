@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { ShieldCheck, Zap, LogOut, Mic, Globe, FileText, Activity, Music, Menu, X, Clock, Volume2 } from 'lucide-react';
+import { ShieldCheck, LogOut, Mic, Globe, FileText, Activity, Music, Menu, X, Clock, Volume2 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase';
 import { useVoiceContext } from './VoiceContext';
