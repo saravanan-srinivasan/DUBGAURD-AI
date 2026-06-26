@@ -187,16 +187,16 @@ const VoiceStudio: React.FC = () => {
       <div className="upload-card glass-panel">
         
         {/* Toggle Mode */}
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '12px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2rem', background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '12px' }}>
           <button 
             onClick={() => setIsMultiSpeaker(false)}
-            style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', background: !isMultiSpeaker ? 'var(--accent)' : 'transparent', color: !isMultiSpeaker ? 'white' : 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+            style={{ flex: '1 1 150px', whiteSpace: 'nowrap', padding: '0.8rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', background: !isMultiSpeaker ? 'var(--accent)' : 'transparent', color: !isMultiSpeaker ? 'white' : 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
           >
             <Mic size={18} /> Single Speaker
           </button>
           <button 
             onClick={() => setIsMultiSpeaker(true)}
-            style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', background: isMultiSpeaker ? 'var(--accent)' : 'transparent', color: isMultiSpeaker ? 'white' : 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+            style={{ flex: '1 1 150px', whiteSpace: 'nowrap', padding: '0.8rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', background: isMultiSpeaker ? 'var(--accent)' : 'transparent', color: isMultiSpeaker ? 'white' : 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
           >
             <Users size={18} /> Multi-Speaker Podcast
           </button>
