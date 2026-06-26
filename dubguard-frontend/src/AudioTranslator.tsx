@@ -110,7 +110,7 @@ const AudioTranslator: React.FC = () => {
         
         <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           
-          <div style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ flex: '1 1 min(100%, 350px)', display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0 }}>
             <div className={`upload-zone ${audioFile ? 'has-file' : ''}`}>
               <input 
                 type="file" 
@@ -178,7 +178,7 @@ const AudioTranslator: React.FC = () => {
           </div>
 
           {(originalText || audioUrl) && (
-            <div style={{ flex: '1 1 450px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }} className="animate-fade-in">
+            <div style={{ flex: '1 1 min(100%, 450px)', display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0 }} className="animate-fade-in">
               
               {audioUrl && (
                 <div className="corrected-output-section" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)' }}>
