@@ -137,6 +137,10 @@ button {
   transition: all 0.2s ease;
 }
 
+audio {
+  max-width: 100%;
+}
+
 /* ─── CUSTOM SCROLLBAR ────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
@@ -167,6 +171,10 @@ button {
 .glass-panel:hover {
   border-color: rgba(255,255,255,0.14);
   box-shadow: var(--shadow-lg), inset 0 0 30px rgba(255,255,255,0.04);
+}
+
+.main-panel {
+  padding: 2.5rem;
 }
 
 /* ─── ANIMATIONS ─────────────────────────────────────────── */
@@ -773,6 +781,7 @@ li { line-height: 1.6; color: var(--text-secondary); }
   .score-info h2 { font-size: 1.5rem; }
   .details-grid { grid-template-columns: repeat(2, 1fr); }
   .issues-list, .recs-list, .corrected-output-section, .audio-comparison, .upload-card { padding: 1.25rem; }
+  .main-panel { padding: 1.25rem !important; }
 }
 
 @media (max-width: 480px) {

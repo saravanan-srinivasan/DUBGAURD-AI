@@ -56,7 +56,7 @@ const VocalIsolator: React.FC = () => {
         <p>Extract pure vocals and background instrumentals from any audio track using advanced DSP algorithms.</p>
       </header>
 
-      <div className="upload-card glass-panel" style={{ padding: '2.5rem' }}>
+      <div className="upload-card glass-panel main-panel">
         
         <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           

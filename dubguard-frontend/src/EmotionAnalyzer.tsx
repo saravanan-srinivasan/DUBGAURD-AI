@@ -66,7 +66,7 @@ const EmotionAnalyzer: React.FC = () => {
         <p>Detect the underlying emotional sentiment and tone from any spoken audio.</p>
       </header>
 
-      <div className="upload-card glass-panel" style={{ padding: '2.5rem' }}>
+      <div className="upload-card glass-panel main-panel">
         
         <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           

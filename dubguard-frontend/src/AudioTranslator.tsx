@@ -106,7 +106,7 @@ const AudioTranslator: React.FC = () => {
         <p>Upload any audio file, translate it into multiple languages, and generate a dubbed neural voice.</p>
       </header>
 
-      <div className="upload-card glass-panel" style={{ padding: '2.5rem' }}>
+      <div className="upload-card glass-panel main-panel">
         
         <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           

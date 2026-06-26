@@ -75,7 +75,7 @@ const History: React.FC = () => {
         <p>Access your recently generated audio, translations, and summaries.</p>
       </header>
 
-      <div className="glass-panel" style={{ padding: '2.5rem', width: '100%' }}>
+      <div className="glass-panel main-panel" style={{ width: '100%' }}>
         {loading ? (
           <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>Loading history...</div>
         ) : items.length === 0 ? (

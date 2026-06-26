@@ -131,7 +131,7 @@ const PodcastSummarizer: React.FC = () => {
         <p>Upload a long audio file and let our AI extract key insights and bullet points.</p>
       </header>
 
-      <div className="upload-card glass-panel" style={{ padding: '2.5rem' }}>
+      <div className="upload-card glass-panel main-panel">
         
         <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
           
