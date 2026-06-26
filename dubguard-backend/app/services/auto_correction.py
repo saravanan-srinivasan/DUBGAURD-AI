@@ -209,11 +209,8 @@ CRITICAL RULES:
         try:
             # 1. Always translate to the target language
             # Don't try to detect - just translate regardless. The LLM handles same-language gracefully.
-            final_text = text
-            if target_lang != 'en':
-                # Always translate to the target language
-                final_text = self.translate_with_llm(text, target_lang)
-                logger.info(f"Text translated for TTS: {final_text[:60]}...")
+            final_text = self.translate_with_llm(text, target_lang)
+            logger.info(f"Text translated for TTS: {final_text[:60]}...")
             
             # 2. Pick the correct voice for the target language
             voice = VOICE_MAP.get(target_lang, 'en-US-JennyNeural')
