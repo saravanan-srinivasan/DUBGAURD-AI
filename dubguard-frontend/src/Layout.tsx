@@ -73,7 +73,7 @@ const Layout: React.FC = () => {
 
       {voiceModalOpen && (
         <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="modal-content glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '2rem', position: 'relative' }}>
+          <div className="modal-content glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '2rem', position: 'relative', background: '#0d1117', border: '1px solid rgba(255,255,255,0.1)' }}>
             <button onClick={() => setVoiceModalOpen(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}>
               <X size={20} />
             </button>
